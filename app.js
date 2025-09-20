@@ -29,6 +29,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 // Routes import
+import guruRoute from "./routes/guru.js";
 
 // Cookie parse
 app.use(cookieParser());
@@ -52,6 +53,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // routes
+app.use("/guru", guruRoute);
 
 //Error handling
 app.use(errorHandler);
