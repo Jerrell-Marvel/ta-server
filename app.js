@@ -28,8 +28,6 @@ import cors from "cors";
 // cookie parser
 import cookieParser from "cookie-parser";
 
-// Routes import
-
 // Cookie parse
 app.use(cookieParser());
 
@@ -51,7 +49,13 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Routes import
+import authRoute from "./routes/auth.js";
 // routes
+const api = express.Router();
+api.use("/auth", authRoute);
+
+app.use("/api/v1", api);
 
 //Error handling
 app.use(errorHandler);
