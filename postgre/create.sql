@@ -9,13 +9,17 @@ CREATE TABLE Users (
     role user_role NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE Users
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE TABLE Guru (
     id_guru SERIAL PRIMARY KEY,
-    user_id INT UNIQUE NOT NULL,
+    id_user INT UNIQUE NOT NULL,
     notification_id VARCHAR(255),
-    CONSTRAINT fk_guru_user FOREIGN KEY(user_id) REFERENCES Users(id_user) ON DELETE CASCADE
+    CONSTRAINT fk_guru_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
 );
+ALTER TABLE Guru
+ADD COLUMN nomor_telepon VARCHAR(20);
 
 CREATE TABLE Kelas (
     id_kelas SERIAL PRIMARY KEY,

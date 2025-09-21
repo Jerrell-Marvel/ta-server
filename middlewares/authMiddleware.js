@@ -17,7 +17,7 @@ export const authMiddleware = (requiredRoles) => {
 
       const token = authHeader.split(" ")[1];
 
-      const payload = jwt.verify(token, process.env.PUBLIC_KEY);
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
 
       if (!requiredRoles.includes(payload.role)) {
         return next(new ForbiddenError("You do not have permission to access this resource"));

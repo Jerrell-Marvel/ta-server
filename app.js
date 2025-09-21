@@ -13,7 +13,7 @@ import "express-async-errors";
 import axios from "axios";
 
 // Error handler
-import { errorHandler } from "./middleware/errorHandler.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 //Path
 import path from "path";
@@ -39,7 +39,7 @@ app.use(cors());
 
 // Morgan
 import morgan from "morgan";
-import { authMiddleware } from "./middleware/authMiddleware.js";
+import { authMiddleware } from "./middlewares/authMiddleware.js";
 app.use(morgan("dev"));
 
 // __dirname
@@ -51,9 +51,11 @@ const __dirname = dirname(__filename);
 
 // Routes import
 import authRoute from "./routes/auth.js";
+import guruRoute from "./routes/guru.js";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
+api.use("/guru", guruRoute);
 
 app.use("/api/v1", api);
 
