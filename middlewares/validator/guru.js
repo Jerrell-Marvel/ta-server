@@ -5,7 +5,6 @@ const createGuruRule = [
   { field: "username", displayName: "username" },
   { field: "password", displayName: "password" },
   { field: "nama", displayName: "nama" },
-  { field: "url_foto", displayName: "foto" },
   { field: "notification_id", displayName: "notification ID" },
   { field: "nomor_telepon", displayName: "nomor telepon" },
 ];

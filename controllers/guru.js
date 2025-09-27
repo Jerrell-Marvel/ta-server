@@ -1,3 +1,4 @@
+import { BadRequestError } from "../errors/BadRequestError.js";
 import * as guruService from "../services/guru.js";
 
 export const getAllGurus = async (req, res) => {
@@ -20,7 +21,12 @@ export const getSingleGuru = async (req, res) => {
 };
 
 export const createGuru = async (req, res) => {
-  const newGuru = await guruService.createGuru(req.body);
+  if (!req.file) {
+    throw new BadRequestError("profile_picture must be included");
+  }
+  const url_foto = `${req.get("host")}/${req.file.filename}`;
+
+  const newGuru = await guruService.createGuru({ ...req.body, url_foto });
 
   res.status(201).json({ success: true, data: newGuru });
 };

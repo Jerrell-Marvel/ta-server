@@ -49,9 +49,13 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// public static
+app.use(express.static("public"));
+
 // Routes import
 import authRoute from "./routes/auth.js";
 import guruRoute from "./routes/guru.js";
+import exp from "constants";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);

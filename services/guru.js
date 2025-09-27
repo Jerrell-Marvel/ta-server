@@ -29,6 +29,8 @@ export const createGuru = async (guruData) => {
     );
     const newUser = newUserQueryResult.rows[0];
 
+    console.log(newUser);
+
     const newGuruQueryResult = await guruRepo.createGuru(
       {
         id_user: newUser.id_user,

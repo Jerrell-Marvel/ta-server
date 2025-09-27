@@ -26,13 +26,13 @@ export const getGuruByUserId = async (userId) => {
   return result;
 };
 
-export const createGuru = async ({ user_id, nomor_telepon, notification_id }, client) => {
+export const createGuru = async ({ id_user, nomor_telepon, notification_id }, client) => {
   const query = `
     INSERT INTO Guru (id_user, nomor_telepon, notification_id)
     VALUES ($1, $2, $3)
     RETURNING id_guru, id_user, nomor_telepon;
   `;
-  const values = [user_id, nomor_telepon, notification_id];
+  const values = [id_user, nomor_telepon, notification_id];
   const executor = client ?? pool;
   const result = await executor.query(query, values);
 

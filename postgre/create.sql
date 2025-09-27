@@ -21,6 +21,17 @@ CREATE TABLE Guru (
 ALTER TABLE Guru
 ADD COLUMN nomor_telepon VARCHAR(20);
 
+ALTER TABLE Guru
+DROP COLUMN notification_id;
+CREATE TABLE NotificationToken (
+    id_notification_token SERIAL PRIMARY KEY,
+    id_user INT NOT NULL,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    device_name VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tokens_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
+);
+
 CREATE TABLE Kelas (
     id_kelas SERIAL PRIMARY KEY,
     nomor_kelas INT NOT NULL,
