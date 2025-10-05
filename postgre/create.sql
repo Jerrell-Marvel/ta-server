@@ -47,6 +47,8 @@ CREATE TABLE Siswa (
     id_kelas INT,
     CONSTRAINT fk_id_kelas FOREIGN KEY (id_kelas) REFERENCES Kelas (id_kelas)
 );
+ALTER TABLE Siswa
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE TABLE Penjemput (
     id_penjemput SERIAL PRIMARY KEY,

@@ -5,6 +5,27 @@ export const getGuruIdByUserId = async (userId) => {
   return result;
 };
 
+export const getGuruByIdGuru = async (idGuru) => {
+  const query = `SELECT
+  u.id_user,
+  u.username,
+  u.nama,
+  u.url_foto,
+  u.role,
+  u.is_active,
+  g.id_guru,
+  g.nomor_telepon
+FROM
+  Users u
+INNER JOIN
+  Guru g ON u.id_user = g.id_user
+WHERE
+  g.id_guru = $1 AND u.is_active = true;`;
+  const result = await pool.query(query, [idGuru]);
+
+  return result;
+};
+
 export const getGuruByUserId = async (userId) => {
   const query = `
     SELECT
@@ -14,7 +35,6 @@ export const getGuruByUserId = async (userId) => {
       u.nama,
       u.url_foto,
       g.nomor_telepon,
-      g.notification_id,
       u.is_active,
       u.created_at
     FROM Guru g
@@ -26,20 +46,20 @@ export const getGuruByUserId = async (userId) => {
   return result;
 };
 
-export const createGuru = async ({ id_user, nomor_telepon, notification_id }, client) => {
+export const createGuru = async ({ id_user, nomor_telepon }, client) => {
   const query = `
-    INSERT INTO Guru (id_user, nomor_telepon, notification_id)
-    VALUES ($1, $2, $3)
+    INSERT INTO Guru (id_user, nomor_telepon)
+    VALUES ($1, $2)
     RETURNING id_guru, id_user, nomor_telepon;
   `;
-  const values = [id_user, nomor_telepon, notification_id];
+  const values = [id_user, nomor_telepon];
   const executor = client ?? pool;
   const result = await executor.query(query, values);
 
   return result;
 };
 
-export const updateGuru = async (guruId, { nomor_telepon, notification_id }, client) => {
+export const updateGuru = async (guruId, { nomor_telepon }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -47,10 +67,6 @@ export const updateGuru = async (guruId, { nomor_telepon, notification_id }, cli
   if (nomor_telepon) {
     fields.push(`nomor_telepon = $${paramCount++}`);
     values.push(nomor_telepon);
-  }
-  if (notification_id) {
-    fields.push(`notification_id = $${paramCount++}`);
-    values.push(notification_id);
   }
 
   if (fields.length === 0) {
@@ -73,24 +89,24 @@ export const updateGuru = async (guruId, { nomor_telepon, notification_id }, cli
 export const getTotalGurus = async () => {
   const query = `SELECT COUNT(*) AS total FROM users u where u.role='guru' AND is_active='true'`;
   const countResult = await pool.query(query);
-  return parseInt(countResult.rows[0].total, 10);
+  return Number(countResult.rows[0].total);
 };
 
-export const findAllGurus = async ({ limit, offset }) => {
+export const getAllGurus = async ({ limit, offset }) => {
   const queryParams = [];
   let paramIndex = 1;
 
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
-  const finalQuery = `SELECT
+  const query = `SELECT
       g.id_guru, u.id_user, u.username, u.nama, u.url_foto,
       g.nomor_telepon, u.is_active, u.created_at FROM Guru g
-  JOIN Users u ON g.id_user = u.id_user ${pagination}`;
+  JOIN Users u ON g.id_user = u.id_user WHERE u.is_active = 'true' ${pagination}`;
 
-  console.log(finalQuery);
+  console.log(query);
 
-  const result = await pool.query(finalQuery, queryParams);
+  const result = await pool.query(query, queryParams);
 
   return result;
 };

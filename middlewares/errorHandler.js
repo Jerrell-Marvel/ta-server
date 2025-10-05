@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 export const errorHandler = (err, req, res, next) => {
-  console.log(JSON.stringify(err));
+  console.log("ERRRORRRRRRRRRRRRRRRR");
 
   let customError = {
     success: false,
-    name: err.name || "Internal server error",
-    statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-    message: err.message || "Something went wrong try again later",
+    name: err?.name || "Internal server error",
+    statusCode: err?.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+    message: err?.message || "Something went wrong try again later",
   };
 
   if (err.name === "MulterError") {

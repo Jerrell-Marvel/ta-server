@@ -21,9 +21,6 @@ export const getSingleGuru = async (req, res) => {
 };
 
 export const createGuru = async (req, res) => {
-  if (!req.file) {
-    throw new BadRequestError("profile_picture must be included");
-  }
   const url_foto = `${req.get("host")}/${req.file.filename}`;
 
   const newGuru = await guruService.createGuru({ ...req.body, url_foto });
@@ -32,18 +29,25 @@ export const createGuru = async (req, res) => {
 };
 
 export const updateGuru = async (req, res) => {
-  const { id } = req.params;
+  const { id_guru } = req.params;
   const updateData = req.body;
 
-  await guruService.updateGuru(Number(id), updateData);
+  console.log(req.file);
+  if (req.file) {
+    updateData.url_foto = `${req.get("host")}/${req.file.filename}`;
+  }
+
+  console.log(updateData);
+
+  await guruService.updateGuru(Number(id_guru), updateData);
 
   res.status(200).json({ success: true });
 };
 
 export const deleteGuru = async (req, res) => {
-  const { id } = req.params;
+  const { id_guru } = req.params;
 
-  await guruService.deleteGuru(parseInt(id, 10));
+  await guruService.deleteGuru(Number(id_guru));
 
   res.status(200).json({ success: true });
 };

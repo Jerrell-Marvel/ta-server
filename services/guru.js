@@ -55,21 +55,23 @@ export const createGuru = async (guruData) => {
   }
 };
 
-export const updateGuru = async (userId, updateData) => {
-  const getGuruQueryResult = await guruRepo.getGuruIdByUserId(userId);
+export const updateGuru = async (idGuru, updateData) => {
+  const getGuruQueryResult = await guruRepo.getGuruByIdGuru(idGuru);
 
   if (getGuruQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${userId} not found.`);
+    throw new NotFoundError(`Guru with ID ${idGuru} not found.`);
   }
 
-  const { username, nama, url_foto, nomor_telepon, notification_id } = updateData;
-  const guruId = getGuruQueryResult.rows[0].id_guru;
+  const { username, nama, url_foto, nomor_telepon } = updateData;
+
+  const guru = getGuruQueryResult.rows[0];
+  const idUser = guru.id_user;
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     await userRepo.updateUser(
-      userId,
+      idUser,
       {
         username,
         nama,
@@ -79,10 +81,9 @@ export const updateGuru = async (userId, updateData) => {
     );
 
     await guruRepo.updateGuru(
-      guruId,
+      idGuru,
       {
         nomor_telepon,
-        notification_id,
       },
       client
     );
@@ -96,13 +97,14 @@ export const updateGuru = async (userId, updateData) => {
   }
 };
 
-export const deleteGuru = async (userId) => {
-  const guru = await guruRepo.getGuruByUserId(userId);
-  if (guru.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${userId} not found.`);
+export const deleteGuru = async (idGuru) => {
+  const queryResult = await guruRepo.getGuruByIdGuru(idGuru);
+  if (queryResult.rowCount === 0) {
+    throw new NotFoundError(`Guru with ID ${idGuru} not found.`);
   }
 
-  await userRepo.deleteUser(userId);
+  const idUser = queryResult.rows[0].id_guru;
+  await userRepo.deleteUser(idUser);
 
   return;
 };
@@ -119,7 +121,7 @@ export const getSingleGuru = async (userId) => {
 export const getAllGurus = async ({ page, limit }) => {
   const offset = (page - 1) * limit;
 
-  const gurusQueryResult = await guruRepo.findAllGurus({
+  const gurusQueryResult = await guruRepo.getAllGurus({
     limit,
     offset,
   });
@@ -129,7 +131,6 @@ export const getAllGurus = async ({ page, limit }) => {
   const totalPages = Math.ceil(totalGurus / limit);
 
   return {
-    message: "Gurus fetched successfully.",
     data: gurus,
     pagination: {
       totalGurus,

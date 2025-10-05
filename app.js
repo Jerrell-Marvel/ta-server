@@ -1,17 +1,13 @@
 // Express
 import express from "express";
 const app = express();
+import "express-async-errors";
 
 // import multer from "multer";
 // const upload = multer();
 // app.use(upload.array("product-images"));
 
 // Express async errors
-import "express-async-errors";
-
-//axios
-import axios from "axios";
-
 // Error handler
 import { errorHandler } from "./middlewares/errorHandler.js";
 
@@ -55,11 +51,12 @@ app.use(express.static("public"));
 // Routes import
 import authRoute from "./routes/auth.js";
 import guruRoute from "./routes/guru.js";
-import exp from "constants";
+import siswaRoute from "./routes/siswa.js";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
 api.use("/guru", guruRoute);
+api.use("/siswa", siswaRoute);
 
 app.use("/api/v1", api);
 

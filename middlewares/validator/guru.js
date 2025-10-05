@@ -9,6 +9,9 @@ const createGuruRule = [
   { field: "nomor_telepon", displayName: "nomor telepon" },
 ];
 export const createGuruValidator = (req, res, next) => {
+  if (!req.file) {
+    throw new BadRequestError("profile_picture must be included");
+  }
   validateObject(req.body, createGuruRule);
 
   next();
