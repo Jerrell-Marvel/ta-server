@@ -24,6 +24,7 @@ export const createGuru = async (guruData) => {
         hashedPassword,
         nama,
         url_foto,
+        role: "guru",
       },
       client
     );

@@ -52,10 +52,10 @@ ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE TABLE Penjemput (
     id_penjemput SERIAL PRIMARY KEY,
-    user_id INT UNIQUE NOT NULL,
+    id_user INT UNIQUE NOT NULL,
     public_key TEXT,
     id_siswa INT, 
-    CONSTRAINT fk_penjemput_user FOREIGN KEY(user_id) REFERENCES Users(id_user) ON DELETE CASCADE,
+    CONSTRAINT fk_penjemput_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE,
     CONSTRAINT fk_penjemput_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa)
 );
 
