@@ -1,6 +1,6 @@
 import * as userRepo from "../repositories/user.js";
 import * as penjempuRepo from "../repositories/penjemput.js";
-import { ConflictError } from "../errors/index.js";
+import { ConflictError, NotFoundError } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 import pool from "../db.js";
 
@@ -53,4 +53,81 @@ export const createPenjemput = async (penjemputData) => {
   } finally {
     client.release();
   }
+};
+
+export const updatePenjemput = async (idPenjemput, updateData) => {
+  const getPenjemputQueryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+
+  if (getPenjemputQueryResult.rowCount === 0) {
+    throw new NotFoundError(`Penjemput with ID ${idPenjemput} not found.`);
+  }
+
+  const { username, nama, url_foto, id_siswa } = updateData;
+
+  const penjemput = getPenjemputQueryResult.rows[0];
+  const idUser = penjemput.id_user;
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await userRepo.updateUser(
+      idUser,
+      {
+        username,
+        nama,
+        url_foto,
+      },
+      client
+    );
+
+    await penjempuRepo.updatePenjemput(
+      idPenjemput,
+      {
+        id_siswa,
+      },
+      client
+    );
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const deletePenjemput = async (idPenjemput) => {
+  const queryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+  if (queryResult.rowCount === 0) {
+    throw new NotFoundError(`Guru with ID ${idPenjemput} not found.`);
+  }
+
+  const idUser = queryResult.rows[0].id_user;
+  await userRepo.deleteUser(idUser);
+
+  return;
+};
+
+export const getAllPenjemputs = async ({ page, limit }) => {
+  const offset = (page - 1) * limit;
+
+  const penjemputsQueryResult = await penjempuRepo.getAllPenjemputs({
+    limit,
+    offset,
+  });
+  const penjemputs = penjemputsQueryResult.rows;
+
+  const totalPenjemputs = await penjempuRepo.getTotalPenjemputs();
+  const totalPages = Math.ceil(totalPenjemputs / limit);
+
+  return {
+    data: penjemputs,
+    pagination: {
+      totalPenjemputs,
+      totalPages,
+      currentPage: page,
+      limit,
+    },
+  };
 };

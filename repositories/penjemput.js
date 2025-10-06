@@ -5,7 +5,7 @@ export const getGuruIdByUserId = async (userId) => {
   return result;
 };
 
-export const getGuruByIdGuru = async (idGuru) => {
+export const getPenjemputByIdPenjemput = async (idPenjemput) => {
   const query = `SELECT
   u.id_user,
   u.username,
@@ -13,15 +13,15 @@ export const getGuruByIdGuru = async (idGuru) => {
   u.url_foto,
   u.role,
   u.is_active,
-  g.id_guru,
-  g.nomor_telepon
+  p.id_penjemput,
+  p.id_siswa
 FROM
   Users u
 INNER JOIN
-  Guru g ON u.id_user = g.id_user
+  Penjemput p ON u.id_user = p.id_user
 WHERE
-  g.id_guru = $1 AND u.is_active = true;`;
-  const result = await pool.query(query, [idGuru]);
+  p.id_penjemput = $1 AND u.is_active = true;`;
+  const result = await pool.query(query, [idPenjemput]);
 
   return result;
 };
@@ -29,12 +29,12 @@ WHERE
 export const getGuruByUserId = async (userId) => {
   const query = `
     SELECT
-      g.id_guru,
+      p.id_penjemput,
       u.id_user,
       u.username,
       u.nama,
       u.url_foto,
-      g.nomor_telepon,
+      p.id_kelas,
       u.is_active,
       u.created_at
     FROM Guru g
@@ -59,26 +59,31 @@ export const createPenjemput = async ({ id_user, id_siswa }, client) => {
   return result;
 };
 
-export const updateGuru = async (guruId, { nomor_telepon }, client) => {
+export const updatePenjemput = async (idPenjemput, { id_siswa, public_key }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
 
-  if (nomor_telepon) {
-    fields.push(`nomor_telepon = $${paramCount++}`);
-    values.push(nomor_telepon);
+  if (id_siswa) {
+    fields.push(`id_siswa = $${paramCount++}`);
+    values.push(id_siswa);
+  }
+
+  if (public_key) {
+    fields.push(`public_key = $${paramCount++}`);
+    values.push(public_key);
   }
 
   if (fields.length === 0) {
     return null;
   }
 
-  values.push(guruId);
+  values.push(idPenjemput);
   const query = `
-    UPDATE Guru
+    UPDATE Penjemput
     SET ${fields.join(", ")}
-    WHERE id_guru = $${paramCount}
-    RETURNING id_guru, id_user, nomor_telepon, notification_id;
+    WHERE id_penjemput = $${paramCount}
+    RETURNING id_penjemput, id_user, id_penjemput;
   `;
 
   const executor = client ?? pool;
@@ -86,13 +91,13 @@ export const updateGuru = async (guruId, { nomor_telepon }, client) => {
   return result;
 };
 
-export const getTotalGurus = async () => {
-  const query = `SELECT COUNT(*) AS total FROM users u where u.role='guru' AND is_active='true'`;
+export const getTotalPenjemputs = async () => {
+  const query = `SELECT COUNT(*) AS total FROM users u where u.role='penjemput' AND is_active='true'`;
   const countResult = await pool.query(query);
   return Number(countResult.rows[0].total);
 };
 
-export const getAllGurus = async ({ limit, offset }) => {
+export const getAllPenjemputs = async ({ limit, offset }) => {
   const queryParams = [];
   let paramIndex = 1;
 
@@ -100,9 +105,8 @@ export const getAllGurus = async ({ limit, offset }) => {
   queryParams.push(limit, offset);
 
   const query = `SELECT
-      g.id_guru, u.id_user, u.username, u.nama, u.url_foto,
-      g.nomor_telepon, u.is_active, u.created_at FROM Guru g
-  JOIN Users u ON g.id_user = u.id_user WHERE u.is_active = 'true' ${pagination}`;
+      p.id_penjemput, u.id_user, u.username, u.nama as nama_penjemput, u.url_foto,
+      p.id_siswa, s.nama as nama_siswa, k.nomor_kelas, k.varian_kelas, u.is_active, u.created_at FROM Penjemput p INNER JOIN Users u ON p.id_user = u.id_user LEFT JOIN siswa s ON s.id_siswa = p.id_siswa LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE u.is_active = 'true' ${pagination}`;
 
   console.log(query);
 
