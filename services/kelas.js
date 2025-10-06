@@ -1,0 +1,127 @@
+import * as kelasRepo from "../repositories/kelas.js";
+import * as siswaRepo from "../repositories/siswa.js";
+import pool from "../db.js";
+import { NotFoundError } from "../errors/NotFoundError.js";
+
+export const createKelas = async (kelasData) => {
+  const { nomor_kelas, varian_kelas, id_guru, wali_kelas_id_guru, siswa } = kelasData;
+
+  console.log("kldsjflsk", siswa);
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const newKelasQueryResult = await kelasRepo.createKelas(
+      {
+        nomor_kelas,
+        varian_kelas,
+        id_guru,
+        wali_kelas_id_guru,
+      },
+      client
+    );
+    const newKelas = newKelasQueryResult.rows[0];
+    const newKelasId = newKelas.id_kelas;
+
+    for (const id_siswa of siswa) {
+      await siswaRepo.updateSiswa(id_siswa, { id_kelas: newKelasId }, client);
+    }
+
+    await client.query("COMMIT");
+
+    return newKelas;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateKelas = async (idKelas, updateData) => {
+  const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
+
+    if (updateKelasQueryResult.rowCount === 0) {
+      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+    }
+
+    for (const id_siswa of tambah_siswa) {
+      await siswaRepo.updateSiswa(id_siswa, { id_kelas: idKelas }, client);
+    }
+
+    for (const id_siswa of remove_siswa) {
+      await siswaRepo.updateSiswa(id_siswa, { id_kelas: null }, client);
+    }
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteKelas = async (idKelas, updateData) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { wali_kelas_id_guru: null }, client);
+
+    if (updateKelasQueryResult.rowCount === 0) {
+      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+    }
+
+    await siswaRepo.removeSiswasFromKelas(idKelas);
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getAllKelas = async ({ page, limit }) => {
+  const offset = (page - 1) * limit;
+
+  const kelasQueryResult = await kelasRepo.getAllKelas({
+    limit,
+    offset,
+  });
+  const kelas = kelasQueryResult.rows;
+
+  const totalKelas = await kelasRepo.getTotalKelas();
+  const totalPages = Math.ceil(totalKelas / limit);
+
+  return {
+    data: kelas,
+    pagination: {
+      totalKelas,
+      totalPages,
+      currentPage: page,
+      limit,
+    },
+  };
+};
+
+export const getSingleKelas = async (idKelas) => {
+  const kelasQueryResult = await kelasRepo.getSingleKelas(idKelas);
+
+  if (kelasQueryResult.rowCount === 0) {
+    throw new NotFoundError(`Kelas with id ${idKelas} not found`);
+  }
+
+  const kelas = kelasQueryResult.rows;
+
+  return kelas;
+};

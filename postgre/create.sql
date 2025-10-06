@@ -38,7 +38,12 @@ CREATE TABLE Kelas (
     varian_kelas CHAR(1) NOT NULL,
     wali_kelas_id_guru INT,
     CONSTRAINT fk_wali_kelas FOREIGN KEY (wali_kelas_id_guru) REFERENCES Guru (id_guru)
+    UNIQUE (nomor_kelas, varian_kelas)
 );
+ALTER TABLE Kelas
+ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE Kelas
+ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
 
 CREATE TABLE Siswa (
     id_siswa SERIAL PRIMARY KEY,
@@ -46,6 +51,7 @@ CREATE TABLE Siswa (
     url_foto VARCHAR(255) NOT NULL,
     id_kelas INT,
     CONSTRAINT fk_id_kelas FOREIGN KEY (id_kelas) REFERENCES Kelas (id_kelas)
+    
 );
 ALTER TABLE Siswa
 ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;

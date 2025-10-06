@@ -1,7 +1,7 @@
 import pool from "../db.js";
 
-export const getGuruIdByUserId = async (userId) => {
-  const result = await pool.query("SELECT id_guru FROM Guru WHERE id_user = $1", [userId]);
+export const getGuruIdByUserId = async (idUser) => {
+  const result = await pool.query("SELECT id_guru FROM Guru WHERE id_user = $1", [idUser]);
   return result;
 };
 

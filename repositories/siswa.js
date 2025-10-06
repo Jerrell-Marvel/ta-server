@@ -13,7 +13,7 @@ export const createSiswa = async ({ nama, url_foto, id_kelas }) => {
   return result;
 };
 
-export const updateSiswa = async (idSiswa, { nama, url_foto, id_kelas }) => {
+export const updateSiswa = async (idSiswa, { nama, url_foto, id_kelas }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -26,10 +26,9 @@ export const updateSiswa = async (idSiswa, { nama, url_foto, id_kelas }) => {
     fields.push(`url_foto = $${paramCount++}`);
     values.push(url_foto);
   }
-  if (id_kelas) {
-    fields.push(`id_kelas = $${paramCount++}`);
-    values.push(id_kelas);
-  }
+
+  fields.push(`id_kelas = $${paramCount++}`);
+  values.push(id_kelas ?? null);
 
   if (fields.length === 0) {
     return null;
@@ -43,7 +42,8 @@ export const updateSiswa = async (idSiswa, { nama, url_foto, id_kelas }) => {
       RETURNING *;
     `;
 
-  const result = await pool.query(query, values);
+  const executor = client ?? pool;
+  const result = await executor.query(query, values);
   return result;
 };
 
@@ -70,11 +70,20 @@ export const getAllSiswas = async ({ limit, offset }) => {
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
-  const query = `SELECT * FROM siswa s LEFT JOIN kelas k on k.id_kelas = s.id_kelas where s.is_active = 'true' ${pagination}`;
+  const query = `SELECT s.id_siswa, s.nama, s.url_foto, s.id_kelas, k.nomor_kelas, k.varian_kelas, k.wali_kelas_id_guru FROM siswa s LEFT JOIN kelas k on k.id_kelas = s.id_kelas where s.is_active = 'true' ${pagination}`;
 
   console.log(query);
 
   const result = await pool.query(query, queryParams);
 
+  return result;
+};
+
+export const removeSiswasFromKelas = async (idKelas, client) => {
+  const query = "UPDATE siswa SET id_kelas = null WHERE id_kelas = $1";
+  const values = [idKelas];
+
+  const executor = client ?? pool;
+  const result = await executor.query(query, values);
   return result;
 };

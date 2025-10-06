@@ -53,12 +53,14 @@ import authRoute from "./routes/auth.js";
 import guruRoute from "./routes/guru.js";
 import siswaRoute from "./routes/siswa.js";
 import penjemputRoute from "./routes/penjemput.js";
+import kelasRoute from "./routes/kelas.js";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
 api.use("/guru", guruRoute);
 api.use("/siswa", siswaRoute);
 api.use("/penjemput", penjemputRoute);
+api.use("/kelas", kelasRoute);
 
 app.use("/api/v1", api);
 
