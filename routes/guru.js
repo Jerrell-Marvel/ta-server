@@ -12,7 +12,7 @@ router.use(authMiddleware(["admin"]));
 router.post("/", fileUpload("./public").single("profile_picture"), createGuruValidator, createGuru);
 router.get("/", getAllGurus);
 router.get("/:id", getSingleGuru);
-router.put("/:id_guru", fileUpload("./public").single("profile_picture"), updateGuru);
+router.patch("/:id_guru", fileUpload("./public").single("profile_picture"), updateGuru);
 router.delete("/:id_guru", deleteGuru);
 
 export default router;

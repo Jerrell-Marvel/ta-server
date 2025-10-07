@@ -24,6 +24,7 @@ export const createGuru = async (req, res) => {
   const url_foto = `${req.get("host")}/${req.file.filename}`;
 
   const newGuru = await guruService.createGuru({ ...req.body, url_foto });
+  newGuru.url_foto = url_foto;
 
   res.status(201).json({ success: true, data: newGuru });
 };
@@ -33,15 +34,18 @@ export const updateGuru = async (req, res) => {
   const updateData = req.body;
 
   console.log(req.file);
+  const responseBody = { success: true };
   if (req.file) {
-    updateData.url_foto = `${req.get("host")}/${req.file.filename}`;
+    const url_foto = `${req.get("host")}/${req.file.filename}`;
+    updateData.url_foto = url_foto;
+    responseBody.url_foto = url_foto;
   }
 
   console.log(updateData);
 
   await guruService.updateGuru(Number(id_guru), updateData);
 
-  res.status(200).json({ success: true });
+  res.status(200).json(responseBody);
 };
 
 export const deleteGuru = async (req, res) => {

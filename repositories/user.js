@@ -4,13 +4,13 @@ export const getUserByUsername = async (username) => {
   return pool.query("SELECT id_user, username, password, nama, role FROM Users WHERE username = $1", [username]);
 };
 
-export const createUser = async ({ username, hashedPassword, nama, url_foto, role }, client) => {
+export const createUser = async ({ username, nama, url_foto, role }, client) => {
   const query = `
-    INSERT INTO Users (username, password, nama, url_foto, role)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING id_user, username, nama, role, created_at;
+    INSERT INTO Users (username, nama, url_foto, role)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id_user, username, nama;
   `;
-  const values = [username, hashedPassword, nama, url_foto, role];
+  const values = [username, nama, url_foto, role];
 
   const executor = client ?? pool;
   const result = await executor.query(query, values);

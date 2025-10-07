@@ -5,14 +5,12 @@ import bcrypt from "bcryptjs";
 import pool from "../db.js";
 
 export const createPenjemput = async (penjemputData) => {
-  const { username, password, nama, url_foto, id_siswa } = penjemputData;
+  const { username, nama, url_foto, id_siswa } = penjemputData;
 
   const existingUser = await userRepo.getUserByUsername(username);
   if (existingUser.rowCount !== 0) {
     throw new ConflictError("Username is already taken.");
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
 
   const client = await pool.connect();
   try {
@@ -21,7 +19,6 @@ export const createPenjemput = async (penjemputData) => {
     const newUserQueryResult = await userRepo.createUser(
       {
         username,
-        hashedPassword,
         nama,
         url_foto,
         role: "penjemput",

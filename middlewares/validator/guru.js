@@ -3,9 +3,9 @@ import { validateObject } from "../../utils/validateObject.js";
 
 const createGuruRule = [
   { field: "username", displayName: "username" },
-  { field: "password", displayName: "password" },
+  // { field: "password", displayName: "password" },
   { field: "nama", displayName: "nama" },
-  { field: "notification_id", displayName: "notification ID" },
+  // { field: "notification_id", displayName: "notification ID" },
   { field: "nomor_telepon", displayName: "nomor telepon" },
 ];
 export const createGuruValidator = (req, res, next) => {

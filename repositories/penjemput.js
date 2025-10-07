@@ -105,7 +105,7 @@ export const getAllPenjemputs = async ({ limit, offset }) => {
   queryParams.push(limit, offset);
 
   const query = `SELECT
-      p.id_penjemput, u.id_user, u.username, u.nama as nama_penjemput, u.url_foto,
+      p.id_penjemput, u.id_user, u.username, u.nama, u.url_foto,
       p.id_siswa, s.nama as nama_siswa, k.nomor_kelas, k.varian_kelas, u.is_active, u.created_at FROM Penjemput p INNER JOIN Users u ON p.id_user = u.id_user LEFT JOIN siswa s ON s.id_siswa = p.id_siswa LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE u.is_active = 'true' ${pagination}`;
 
   console.log(query);

@@ -14,7 +14,7 @@ router.use(authMiddleware(["admin"]));
 router.post("/", fileUpload("./public").single("profile_picture"), createPenjemputValidator, createPenjemput);
 router.get("/", getAllPenjemputs);
 // router.get("/:id", getSingleGuru);
-router.put("/:id_penjemput", fileUpload("./public").single("profile_picture"), updatePenjemput);
+router.patch("/:id_penjemput", fileUpload("./public").single("profile_picture"), updatePenjemput);
 router.delete("/:id_penjemput", deletePenjemput);
 
 export default router;

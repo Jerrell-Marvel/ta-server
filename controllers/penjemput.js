@@ -3,25 +3,25 @@ import * as penjemputService from "../services/penjemput.js";
 export const createPenjemput = async (req, res) => {
   const url_foto = `${req.get("host")}/${req.file.filename}`;
 
-  const newGuru = await penjemputService.createPenjemput({ ...req.body, url_foto });
-
-  res.status(201).json({ success: true, data: newGuru });
+  const newPenjemput = await penjemputService.createPenjemput({ ...req.body, url_foto });
+  newPenjemput.url_foto = url_foto;
+  res.status(201).json({ success: true, data: newPenjemput });
 };
 
 export const updatePenjemput = async (req, res) => {
   const { id_penjemput } = req.params;
   const updateData = req.body;
 
-  console.log(req.file);
+  const responseBody = { success: true };
   if (req.file) {
-    updateData.url_foto = `${req.get("host")}/${req.file.filename}`;
+    const url_foto = `${req.get("host")}/${req.file.filename}`;
+    updateData.url_foto = url_foto;
+    responseBody.url_foto = url_foto;
   }
-
-  console.log(updateData);
 
   await penjemputService.updatePenjemput(Number(id_penjemput), updateData);
 
-  res.status(200).json({ success: true });
+  res.status(200).json(responseBody);
 };
 
 export const deletePenjemput = async (req, res) => {

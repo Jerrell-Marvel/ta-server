@@ -78,7 +78,7 @@ export const updateGuru = async (guruId, { nomor_telepon }, client) => {
     UPDATE Guru
     SET ${fields.join(", ")}
     WHERE id_guru = $${paramCount}
-    RETURNING id_guru, id_user, nomor_telepon, notification_id;
+    RETURNING id_guru, id_user, nomor_telepon;
   `;
 
   const executor = client ?? pool;
@@ -101,7 +101,7 @@ export const getAllGurus = async ({ limit, offset }) => {
 
   const query = `SELECT
       g.id_guru, u.id_user, u.username, u.nama, u.url_foto,
-      g.nomor_telepon, u.is_active, u.created_at FROM Guru g
+      g.nomor_telepon FROM Guru g
   JOIN Users u ON g.id_user = u.id_user WHERE u.is_active = 'true' ${pagination}`;
 
   console.log(query);

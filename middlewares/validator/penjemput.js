@@ -3,7 +3,7 @@ import { validateObject } from "../../utils/validateObject.js";
 
 const createPenjemputRule = [
   { field: "username", displayName: "username" },
-  { field: "password", displayName: "password" },
+  // { field: "password", displayName: "password" },
   { field: "nama", displayName: "nama" },
 ];
 export const createPenjemputValidator = (req, res, next) => {

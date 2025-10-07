@@ -5,14 +5,12 @@ import * as guruRepo from "../repositories/guru.js";
 import bcrypt from "bcryptjs";
 
 export const createGuru = async (guruData) => {
-  const { username, password, nama, nomor_telepon, url_foto, notification_id } = guruData;
+  const { username, nama, nomor_telepon, url_foto, notification_id } = guruData;
 
   const existingUser = await userRepo.getUserByUsername(username);
   if (existingUser.rowCount !== 0) {
     throw new ConflictError("Username is already taken.");
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
 
   const client = await pool.connect();
   try {
@@ -21,7 +19,6 @@ export const createGuru = async (guruData) => {
     const newUserQueryResult = await userRepo.createUser(
       {
         username,
-        hashedPassword,
         nama,
         url_foto,
         role: "guru",
@@ -104,7 +101,8 @@ export const deleteGuru = async (idGuru) => {
     throw new NotFoundError(`Guru with ID ${idGuru} not found.`);
   }
 
-  const idUser = queryResult.rows[0].id_guru;
+  const idUser = queryResult.rows[0].id_user;
+  console.log(idUser);
   await userRepo.deleteUser(idUser);
 
   return;

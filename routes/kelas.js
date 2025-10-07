@@ -13,7 +13,7 @@ router.post("/", createKelasValidator, createkelas);
 // router.post("/", fileUpload("./public").single("profile_picture"), createGuruValidator, createGuru);
 router.get("/", getAllKelas);
 router.get("/:id_kelas", getSingleKelas);
-router.put("/:id_kelas", updateKelas);
+router.patch("/:id_kelas", updateKelas);
 router.delete("/:id_kelas", deleteKelas);
 
 export default router;

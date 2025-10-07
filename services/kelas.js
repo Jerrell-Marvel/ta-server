@@ -123,5 +123,7 @@ export const getSingleKelas = async (idKelas) => {
 
   const kelas = kelasQueryResult.rows;
 
+  console.log(kelas);
+
   return kelas;
 };
