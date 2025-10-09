@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import * as siswaService from "../services/siswa.js";
 
 export const createSiswa = async (req, res) => {
-  const url_foto = `${req.get("host")}/${req.file.filename}`;
+  const url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
 
   const newSiswa = await siswaService.createSiswa({ ...req.body, url_foto });
   newSiswa.url_foto = url_foto;
@@ -16,7 +16,7 @@ export const updateSiswa = async (req, res) => {
 
   const responseBody = { success: true };
   if (req.file) {
-    const url_foto = `${req.get("host")}/${req.file.filename}`;
+    const url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
     updateData.url_foto = url_foto;
     responseBody.url_foto = url_foto;
   }

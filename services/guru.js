@@ -7,8 +7,8 @@ import bcrypt from "bcryptjs";
 export const createGuru = async (guruData) => {
   const { username, nama, nomor_telepon, url_foto, notification_id } = guruData;
 
-  const existingUser = await userRepo.getUserByUsername(username);
-  if (existingUser.rowCount !== 0) {
+  const existingUserQueryResult = await userRepo.getUserByUsername(username);
+  if (existingUserQueryResult.rowCount !== 0) {
     throw new ConflictError("Username is already taken.");
   }
 
@@ -53,11 +53,11 @@ export const createGuru = async (guruData) => {
   }
 };
 
-export const updateGuru = async (idGuru, updateData) => {
-  const getGuruQueryResult = await guruRepo.getGuruByIdGuru(idGuru);
+export const updateGuru = async (id_guru, updateData) => {
+  const getGuruQueryResult = await guruRepo.getGuruByIdGuru(id_guru);
 
   if (getGuruQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${idGuru} not found.`);
+    throw new NotFoundError(`Guru with ID ${id_guru} not found.`);
   }
 
   const { username, nama, url_foto, nomor_telepon } = updateData;
@@ -68,7 +68,7 @@ export const updateGuru = async (idGuru, updateData) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await userRepo.updateUser(
+    const updateUserQueryResult = await userRepo.updateUser(
       idUser,
       {
         username,
@@ -77,16 +77,23 @@ export const updateGuru = async (idGuru, updateData) => {
       },
       client
     );
+    const updatedUser = updateUserQueryResult.rows[0];
 
-    await guruRepo.updateGuru(
-      idGuru,
+    const updateGuruQueryResult = await guruRepo.updateGuru(
+      id_guru,
       {
         nomor_telepon,
       },
       client
     );
+    const updatedGuru = updateGuruQueryResult.rows[0];
 
     await client.query("COMMIT");
+
+    return {
+      ...updatedUser,
+      ...updatedGuru,
+    };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

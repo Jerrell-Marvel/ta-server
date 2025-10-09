@@ -8,7 +8,7 @@ export const createUser = async ({ username, nama, url_foto, role }, client) => 
   const query = `
     INSERT INTO Users (username, nama, url_foto, role)
     VALUES ($1, $2, $3, $4)
-    RETURNING id_user, username, nama;
+    RETURNING id_user, username, role, url_foto, nama;
   `;
   const values = [username, nama, url_foto, role];
 

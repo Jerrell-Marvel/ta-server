@@ -1,0 +1,21 @@
+create guru ->
+data : {
+    id_user,
+    username,
+    url_foto,
+    role,
+    nama,
+    id_guru,
+    nomor_telepon
+}
+
+update guru ->
+data : {
+    id_user,
+    username,
+    url_foto,
+    role,
+    nama,
+    id_guru,
+    nomor_telepon
+}

@@ -50,7 +50,7 @@ export const createGuru = async ({ id_user, nomor_telepon }, client) => {
   const query = `
     INSERT INTO Guru (id_user, nomor_telepon)
     VALUES ($1, $2)
-    RETURNING id_guru, id_user, nomor_telepon;
+    RETURNING id_guru, nomor_telepon;
   `;
   const values = [id_user, nomor_telepon];
   const executor = client ?? pool;
@@ -78,7 +78,7 @@ export const updateGuru = async (guruId, { nomor_telepon }, client) => {
     UPDATE Guru
     SET ${fields.join(", ")}
     WHERE id_guru = $${paramCount}
-    RETURNING id_guru, id_user, nomor_telepon;
+    RETURNING id_guru, nomor_telepon;
   `;
 
   const executor = client ?? pool;
