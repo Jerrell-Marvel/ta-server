@@ -86,60 +86,95 @@ export const updateGuru = async (guruId, { nomor_telepon }, client) => {
   return result;
 };
 
-export const getTotalGurus = async () => {
-  const query = `SELECT COUNT(*) AS total FROM users u where u.role='guru' AND is_active='true'`;
-  const countResult = await pool.query(query);
+export const getTotalGurus = async ({ search }) => {
+  const queryParams = [];
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $1 OR u.username ILIKE $1)`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM Guru g
+    JOIN Users u ON g.id_user = u.id_user
+    WHERE u.is_active = 'true' ${searchQuery}
+  `;
+
+  const countResult = await pool.query(query, queryParams);
   return Number(countResult.rows[0].total);
 };
 
-export const getAllGurus = async ({ limit, offset }) => {
+export const getAllGurus = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramIndex = 1;
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $${paramIndex} OR u.username ILIKE $${paramIndex})`;
+    queryParams.push(`%${search.trim()}%`);
+    paramIndex++;
+  }
 
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
   const query = `
-  SELECT
-      g.id_guru,
-      u.id_user,
-      u.username,
-      u.nama,
-      u.url_foto,
-      g.nomor_telepon,
-      k.id_kelas,
-      k.nomor_kelas,
-      k.varian_kelas
-  FROM Guru g
-  JOIN Users u ON g.id_user = u.id_user
-  LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
-  WHERE u.is_active = 'true'
-  ORDER BY u.nama ASC
-  ${pagination}
-`;
-
-  console.log(query);
+    SELECT
+        g.id_guru,
+        u.id_user,
+        u.username,
+        u.nama,
+        u.url_foto,
+        g.nomor_telepon,
+        k.id_kelas,
+        k.nomor_kelas,
+        k.varian_kelas
+    FROM Guru g
+    JOIN Users u ON g.id_user = u.id_user
+    LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+    WHERE u.is_active = 'true'
+    ${searchQuery}
+    ORDER BY u.nama ASC
+    ${pagination}
+  `;
 
   const result = await pool.query(query, queryParams);
-
   return result;
 };
 
-export const getTotalWaliKelas = async () => {
+export const getTotalWaliKelas = async ({ search }) => {
+  const queryParams = [];
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $1 OR u.username ILIKE $1)`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
   const query = `
     SELECT COUNT(*) AS total
     FROM Users u
     JOIN Guru g ON u.id_user = g.id_user
     JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
-    WHERE u.role='guru' AND u.is_active='true'
+    WHERE u.role='guru' AND u.is_active='true' ${searchQuery}
   `;
-  const countResult = await pool.query(query);
+
+  const countResult = await pool.query(query, queryParams);
   return Number(countResult.rows[0].total);
 };
 
-export const getAllWaliKelas = async ({ limit, offset }) => {
+export const getAllWaliKelas = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramIndex = 1;
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $${paramIndex} OR u.username ILIKE $${paramIndex})`;
+    queryParams.push(`%${search.trim()}%`);
+    paramIndex++;
+  }
 
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
@@ -159,6 +194,7 @@ export const getAllWaliKelas = async ({ limit, offset }) => {
     JOIN Users u ON g.id_user = u.id_user
     JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
     WHERE u.is_active = 'true'
+    ${searchQuery}
     ORDER BY u.nama ASC
     ${pagination}
   `;

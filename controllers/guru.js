@@ -4,9 +4,9 @@ import * as guruService from "../services/guru.js";
 export const getAllGurus = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
-  const { wali_kelas } = req.query; // ini string
+  const { wali_kelas, search } = req.query; // ini string
 
-  const result = await guruService.getAllGurus({ page, limit, wali_kelas });
+  const result = await guruService.getAllGurus({ page, limit, wali_kelas, search });
 
   res.status(200).json(result);
 };
