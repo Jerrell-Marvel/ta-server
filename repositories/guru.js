@@ -99,14 +99,70 @@ export const getAllGurus = async ({ limit, offset }) => {
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
-  const query = `SELECT
-      g.id_guru, u.id_user, u.username, u.nama, u.url_foto,
-      g.nomor_telepon FROM Guru g
-  JOIN Users u ON g.id_user = u.id_user WHERE u.is_active = 'true' ${pagination}`;
+  const query = `
+  SELECT
+      g.id_guru,
+      u.id_user,
+      u.username,
+      u.nama,
+      u.url_foto,
+      g.nomor_telepon,
+      k.id_kelas,
+      k.nomor_kelas,
+      k.varian_kelas
+  FROM Guru g
+  JOIN Users u ON g.id_user = u.id_user
+  LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+  WHERE u.is_active = 'true'
+  ORDER BY u.nama ASC
+  ${pagination}
+`;
 
   console.log(query);
 
   const result = await pool.query(query, queryParams);
 
+  return result;
+};
+
+export const getTotalWaliKelas = async () => {
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM Users u
+    JOIN Guru g ON u.id_user = g.id_user
+    JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+    WHERE u.role='guru' AND u.is_active='true'
+  `;
+  const countResult = await pool.query(query);
+  return Number(countResult.rows[0].total);
+};
+
+export const getAllWaliKelas = async ({ limit, offset }) => {
+  const queryParams = [];
+  let paramIndex = 1;
+
+  const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+  queryParams.push(limit, offset);
+
+  const query = `
+    SELECT
+        g.id_guru,
+        u.id_user,
+        u.username,
+        u.nama,
+        u.url_foto,
+        g.nomor_telepon,
+        k.id_kelas,
+        k.nomor_kelas,
+        k.varian_kelas
+    FROM Guru g
+    JOIN Users u ON g.id_user = u.id_user
+    JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+    WHERE u.is_active = 'true'
+    ORDER BY u.nama ASC
+    ${pagination}
+  `;
+
+  const result = await pool.query(query, queryParams);
   return result;
 };

@@ -6,7 +6,10 @@ data : {
     role,
     nama,
     id_guru,
-    nomor_telepon
+    nomor_telepon,
+    id_kelas,
+    nomor_kelas,
+    varian_kelas,
 }
 
 update guru ->
@@ -19,3 +22,6 @@ data : {
     id_guru,
     nomor_telepon
 }
+
+delete guru ->
+{success:true}

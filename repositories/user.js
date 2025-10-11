@@ -45,7 +45,7 @@ export const updateUser = async (userId, { username, nama, url_foto }, client) =
     UPDATE Users
     SET ${fields.join(", ")}
     WHERE id_user = $${paramCount}
-    RETURNING id_user, username, nama, url_foto, role, is_active;
+    RETURNING id_user, username, nama, url_foto, role;
   `;
 
   const executor = client ?? pool;

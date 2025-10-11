@@ -124,18 +124,27 @@ export const getSingleGuru = async (userId) => {
   return getGuruQueryResult.rows[0];
 };
 
-export const getAllGurus = async ({ page, limit }) => {
+export const getAllGurus = async ({ page, limit, wali_kelas }) => {
   const offset = (page - 1) * limit;
 
-  const gurusQueryResult = await guruRepo.getAllGurus({
-    limit,
-    offset,
-  });
+  let gurusQueryResult;
+  let totalGurus;
+  if (wali_kelas === "true") {
+    totalGurus = await guruRepo.getTotalWaliKelas();
+    gurusQueryResult = await guruRepo.getAllWaliKelas({
+      limit,
+      offset,
+    });
+  } else {
+    totalGurus = await guruRepo.getTotalGurus();
+    gurusQueryResult = await guruRepo.getAllGurus({
+      limit,
+      offset,
+    });
+  }
+
   const gurus = gurusQueryResult.rows;
-
-  const totalGurus = await guruRepo.getTotalGurus();
   const totalPages = Math.ceil(totalGurus / limit);
-
   return {
     data: gurus,
     pagination: {
