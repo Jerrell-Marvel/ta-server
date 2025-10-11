@@ -57,25 +57,105 @@ export const deleteSiswa = async (idSiswa) => {
   return result;
 };
 
-export const getTotalSiswas = async () => {
-  const query = `SELECT COUNT(*) AS total FROM siswa s where is_active='true'`;
-  const countResult = await pool.query(query);
+export const getTotalSiswas = async ({ search }) => {
+  const queryParams = [];
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND s.nama ILIKE $1`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM Siswa s
+    WHERE s.is_active = 'true' ${searchQuery}
+  `;
+
+  const countResult = await pool.query(query, queryParams);
   return Number(countResult.rows[0].total);
 };
 
-export const getAllSiswas = async ({ limit, offset }) => {
+export const getAllSiswas = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramIndex = 1;
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND s.nama ILIKE $${paramIndex++}`;
+    queryParams.push(`%${search.trim()}%`);
+  }
 
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
-  const query = `SELECT s.id_siswa, s.nama, s.url_foto, s.id_kelas, k.nomor_kelas, k.varian_kelas, k.wali_kelas_id_guru FROM siswa s LEFT JOIN kelas k on k.id_kelas = s.id_kelas where s.is_active = 'true' ${pagination}`;
-
-  console.log(query);
+  const query = `
+    SELECT
+        s.id_siswa,
+        s.nama,
+        s.url_foto,
+        s.id_kelas,
+        k.nomor_kelas,
+        k.varian_kelas,
+        k.wali_kelas_id_guru
+    FROM Siswa s
+    LEFT JOIN Kelas k ON k.id_kelas = s.id_kelas
+    WHERE s.is_active = 'true'
+    ${searchQuery}
+    ORDER BY s.nama ASC
+    ${pagination}
+  `;
 
   const result = await pool.query(query, queryParams);
+  return result;
+};
 
+export const getTotalSiswasNotInClass = async ({ search }) => {
+  const queryParams = [];
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND s.nama ILIKE $1`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM Siswa s
+    WHERE s.is_active = 'true' AND s.id_kelas IS NULL ${searchQuery}
+  `;
+
+  const countResult = await pool.query(query, queryParams);
+  return Number(countResult.rows[0].total);
+};
+
+export const getAllSiswasNotInClass = async ({ limit, offset, search }) => {
+  const queryParams = [];
+  let paramIndex = 1;
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND s.nama ILIKE $${paramIndex++}`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
+  const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+  queryParams.push(limit, offset);
+
+  const query = `
+    SELECT
+        s.id_siswa,
+        s.nama,
+        s.url_foto,
+        s.id_kelas
+    FROM Siswa s
+    WHERE s.is_active = 'true' AND s.id_kelas IS NULL
+    ${searchQuery}
+    ORDER BY s.nama ASC
+    ${pagination}
+  `;
+
+  const result = await pool.query(query, queryParams);
   return result;
 };
 

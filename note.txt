@@ -25,3 +25,27 @@ data : {
 
 delete guru ->
 {success:true}
+
+create, update siswa -> 
+data : {
+    "id_siswa": 25,
+    "nama": "siswa5",
+    "id_kelas": null,
+    "url_foto": "http://localhost:5000/profile_picture-1760197290624-654926186.png",
+    "is_active": true
+}
+
+get all siswa -> 
+{
+ "id_siswa": 15,
+            "nama": "siswa 1 upd",
+            "url_foto": "localhost:5000/profile_picture-1759786293070-321031364.png",
+            "id_kelas": 19,
+            "nomor_kelas": 1,
+            "varian_kelas": "c",
+            "wali_kelas_id_guru": 17
+}
+
+{
+    
+}

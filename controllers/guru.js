@@ -6,9 +6,9 @@ export const getAllGurus = async (req, res) => {
   const limit = parseInt(req.query.limit, 10) || 10;
   const { wali_kelas, search } = req.query; // ini string
 
-  const result = await guruService.getAllGurus({ page, limit, wali_kelas, search });
+  const gurus = await guruService.getAllGurus({ page, limit, wali_kelas, search });
 
-  res.status(200).json(result);
+  res.status(200).json(gurus);
 };
 
 export const getSingleGuru = async (req, res) => {
