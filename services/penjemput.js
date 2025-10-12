@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import pool from "../db.js";
 
 export const createPenjemput = async (penjemputData) => {
-  const { username, nama, url_foto, id_siswa } = penjemputData;
+  const { username, nama, password, url_foto, id_siswa } = penjemputData;
 
   const existingUser = await userRepo.getUserByUsername(username);
   if (existingUser.rowCount !== 0) {
@@ -21,6 +21,7 @@ export const createPenjemput = async (penjemputData) => {
         username,
         nama,
         url_foto,
+        password,
         role: "penjemput",
       },
       client
@@ -106,16 +107,17 @@ export const deletePenjemput = async (idPenjemput) => {
   return;
 };
 
-export const getAllPenjemputs = async ({ page, limit }) => {
+export const getAllPenjemputs = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
 
   const penjemputsQueryResult = await penjempuRepo.getAllPenjemputs({
     limit,
     offset,
+    search,
   });
   const penjemputs = penjemputsQueryResult.rows;
 
-  const totalPenjemputs = await penjempuRepo.getTotalPenjemputs();
+  const totalPenjemputs = await penjempuRepo.getTotalPenjemputs({ search });
   const totalPages = Math.ceil(totalPenjemputs / limit);
 
   return {

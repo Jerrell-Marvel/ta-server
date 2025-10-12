@@ -51,7 +51,7 @@ export const updateKelas = async (idKelas, { nomor_kelas, varian_kelas, wali_kel
 export const getTotalKelas = async () => {
   const query = `SELECT COUNT(*) AS total FROM kelas WHERE is_active='true'`;
   const countResult = await pool.query(query);
-  return Number(countResult.rows[0].total);
+  return parseInt(countResult.rows[0].total);
 };
 
 export const getAllKelas = async ({ limit, offset }) => {

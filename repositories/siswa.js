@@ -73,7 +73,7 @@ export const getTotalSiswas = async ({ search }) => {
   `;
 
   const countResult = await pool.query(query, queryParams);
-  return Number(countResult.rows[0].total);
+  return parseInt(countResult.rows[0].total);
 };
 
 export const getAllSiswas = async ({ limit, offset, search }) => {
@@ -126,7 +126,7 @@ export const getTotalSiswasNotInClass = async ({ search }) => {
   `;
 
   const countResult = await pool.query(query, queryParams);
-  return Number(countResult.rows[0].total);
+  return parseInt(countResult.rows[0].total);
 };
 
 export const getAllSiswasNotInClass = async ({ limit, offset, search }) => {
@@ -165,5 +165,44 @@ export const removeSiswasFromKelas = async (idKelas, client) => {
 
   const executor = client ?? pool;
   const result = await executor.query(query, values);
+  return result;
+};
+
+export const getSingleSiswa = async ({ id_siswa }) => {
+  const siswaQuery = `
+    SELECT
+        s.id_siswa,
+        s.nama,
+        s.url_foto,
+        s.is_active,
+        k.id_kelas,
+        k.nomor_kelas,
+        k.varian_kelas,
+        g.id_guru AS wali_kelas_id_guru,
+        u_guru.nama AS wali_kelas_nama
+    FROM Siswa s
+    LEFT JOIN Kelas k ON s.id_kelas = k.id_kelas
+    LEFT JOIN Guru g ON k.wali_kelas_id_guru = g.id_guru
+    LEFT JOIN Users u_guru ON g.id_user = u_guru.id_user
+    WHERE s.id_siswa = $1
+  `;
+  const result = await pool.query(siswaQuery, [id_siswa]);
+  return result;
+};
+
+export const getPenjemputSiswa = async ({ id_siswa }) => {
+  const query = `
+    SELECT
+        p.id_penjemput,
+        u.id_user,
+        u.nama,
+        u.username,
+        u.url_foto
+    FROM Penjemput p
+    JOIN Users u ON p.id_user = u.id_user
+    WHERE p.id_siswa = $1 AND u.is_active = 'true'
+    ORDER BY u.nama ASC
+  `;
+  const result = await pool.query(query, [id_siswa]);
   return result;
 };

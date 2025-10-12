@@ -19,7 +19,7 @@ export const updateSiswa = async (req, res) => {
     // responseBody.data.url_foto = url_foto;
   }
 
-  const updatedSiswa = await siswaService.updateSiswa(Number(id_siswa), updateData);
+  const updatedSiswa = await siswaService.updateSiswa(parseInt(id_siswa), updateData);
 
   res.status(200).json({ success: true, data: updatedSiswa });
 };
@@ -27,16 +27,27 @@ export const updateSiswa = async (req, res) => {
 export const deleteSiswa = async (req, res) => {
   const { id_siswa } = req.params;
 
-  await siswaService.deleteSiswa(Number(id_siswa));
+  await siswaService.deleteSiswa(parseInt(id_siswa));
 
   res.status(200).json({ success: true });
 };
 
 export const getAllSiswas = async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   const { assigned, search } = req.query; // assigned itu udah masuk kelas atau belom
   const result = await siswaService.getAllSiswas({ page, limit, assigned, search });
 
   res.status(200).json(result);
+};
+
+export const getSingleSiswa = async (req, res) => {
+  const { id_siswa } = req.params;
+
+  const siswa = await siswaService.getSingleSiswa(parseInt(id_siswa));
+
+  res.status(200).json({
+    success: true,
+    data: siswa,
+  });
 };

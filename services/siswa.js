@@ -65,3 +65,19 @@ export const getAllSiswas = async ({ page, limit, assigned, search }) => {
     },
   };
 };
+
+export const getSingleSiswa = async (id_siswa) => {
+  const siswaQueryResult = await siswaRepo.getSingleSiswa({ id_siswa });
+  if (siswaQueryResult.rowCount === 0) {
+    throw new NotFoundError(`siswa with id ${id_siswa} not found`);
+  }
+  const siswa = siswaQueryResult.rows[0];
+
+  const penjemputQueryResult = await siswaRepo.getPenjemputSiswa({ id_siswa });
+  const penjemput = penjemputQueryResult.rows;
+
+  return {
+    ...siswa,
+    penjemput: penjemput,
+  };
+};

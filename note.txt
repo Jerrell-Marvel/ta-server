@@ -1,4 +1,16 @@
 create guru ->
+"data": {
+        "id_user": 67,
+        "username": "guru24",
+        "role": "guru",
+        "url_foto": "http://localhost:5000/profile_picture-1760243664854-148472524.png",
+        "nama": "guru 23",
+        "id_guru": 35,
+        "nomor_telepon": "08123123123"
+    }
+
+
+get guru ->
 data : {
     id_user,
     username,
@@ -48,4 +60,30 @@ get all siswa ->
 
 {
     
+}
+
+create penjemput -> {
+     "data": {
+        "id_user": 66,
+        "username": "penjemput200",
+        "role": "penjemput",
+        "url_foto": "http://localhost:5000/profile_picture-1760243588235-755292674.png",
+        "nama": "dodol111",
+        "id_penjemput": 12,
+        "id_siswa": 12
+    }
+}
+
+get penjemput -> {
+     {
+            "id_penjemput": 8,
+            "id_user": 60,
+            "username": "penjemput1",
+            "nama": "penjemput 1",
+            "url_foto": "localhost:5000/profile_picture-1759785049232-637023829.png",
+            "id_siswa": 15,
+            "nama_siswa": "siswa 1 upd",
+            "nomor_kelas": 1,
+            "varian_kelas": "c"
+        }
 }

@@ -50,7 +50,7 @@ export const createPenjemput = async ({ id_user, id_siswa }, client) => {
   const query = `
     INSERT INTO Penjemput (id_user, id_siswa)
     VALUES ($1, $2)
-    RETURNING id_penjemput, id_user, id_siswa;
+    RETURNING id_penjemput, id_siswa;
   `;
   const values = [id_user, id_siswa ?? null];
   const executor = client ?? pool;
@@ -91,26 +91,62 @@ export const updatePenjemput = async (idPenjemput, { id_siswa, public_key }, cli
   return result;
 };
 
-export const getTotalPenjemputs = async () => {
-  const query = `SELECT COUNT(*) AS total FROM users u where u.role='penjemput' AND is_active='true'`;
-  const countResult = await pool.query(query);
-  return Number(countResult.rows[0].total);
+export const getTotalPenjemputs = async ({ search }) => {
+  const queryParams = [];
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $1 OR u.username ILIKE $1 OR s.nama ILIKE $1)`;
+    queryParams.push(`%${search.trim()}%`);
+  }
+
+  const query = `
+    SELECT COUNT(*) AS total
+    FROM Penjemput p
+    JOIN Users u ON p.id_user = u.id_user
+    LEFT JOIN Siswa s ON s.id_siswa = p.id_siswa
+    WHERE u.role = 'penjemput' AND u.is_active = 'true' ${searchQuery}
+  `;
+
+  const countResult = await pool.query(query, queryParams);
+  return parseInt(countResult.rows[0].total);
 };
 
-export const getAllPenjemputs = async ({ limit, offset }) => {
+export const getAllPenjemputs = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramIndex = 1;
+  let searchQuery = "";
+
+  if (search && search.trim() !== "") {
+    searchQuery = `AND (u.nama ILIKE $${paramIndex} OR u.username ILIKE $${paramIndex} OR s.nama ILIKE $${paramIndex})`;
+    queryParams.push(`%${search.trim()}%`);
+    paramIndex++;
+  }
 
   const pagination = `LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
   queryParams.push(limit, offset);
 
-  const query = `SELECT
-      p.id_penjemput, u.id_user, u.username, u.nama, u.url_foto,
-      p.id_siswa, s.nama as nama_siswa, k.nomor_kelas, k.varian_kelas, u.is_active, u.created_at FROM Penjemput p INNER JOIN Users u ON p.id_user = u.id_user LEFT JOIN siswa s ON s.id_siswa = p.id_siswa LEFT JOIN kelas k ON s.id_kelas = k.id_kelas WHERE u.is_active = 'true' ${pagination}`;
-
-  console.log(query);
+  const query = `
+    SELECT
+        p.id_penjemput,
+        u.id_user,
+        u.username,
+        u.nama,
+        u.url_foto,
+        p.id_siswa,
+        s.nama as nama_siswa,
+        k.nomor_kelas,
+        k.varian_kelas
+    FROM Penjemput p
+    INNER JOIN Users u ON p.id_user = u.id_user
+    LEFT JOIN Siswa s ON s.id_siswa = p.id_siswa
+    LEFT JOIN Kelas k ON s.id_kelas = k.id_kelas
+    WHERE u.role = 'penjemput' AND u.is_active = 'true'
+    ${searchQuery}
+    ORDER BY u.nama ASC
+    ${pagination}
+  `;
 
   const result = await pool.query(query, queryParams);
-
   return result;
 };

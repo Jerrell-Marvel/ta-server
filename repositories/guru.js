@@ -103,7 +103,7 @@ export const getTotalGurus = async ({ search }) => {
   `;
 
   const countResult = await pool.query(query, queryParams);
-  return Number(countResult.rows[0].total);
+  return parseInt(countResult.rows[0].total);
 };
 
 export const getAllGurus = async ({ limit, offset, search }) => {
@@ -162,7 +162,7 @@ export const getTotalWaliKelas = async ({ search }) => {
   `;
 
   const countResult = await pool.query(query, queryParams);
-  return Number(countResult.rows[0].total);
+  return parseInt(countResult.rows[0].total);
 };
 
 export const getAllWaliKelas = async ({ limit, offset, search }) => {

@@ -2,8 +2,8 @@ import { BadRequestError } from "../errors/BadRequestError.js";
 import * as guruService from "../services/guru.js";
 
 export const getAllGurus = async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   const { wali_kelas, search } = req.query; // ini string
 
   const gurus = await guruService.getAllGurus({ page, limit, wali_kelas, search });
@@ -14,7 +14,7 @@ export const getAllGurus = async (req, res) => {
 export const getSingleGuru = async (req, res) => {
   const { id } = req.params;
 
-  const guru = await guruService.getSingleGuru(parseInt(id, 10));
+  const guru = await guruService.getSingleGuru(parseInt(id));
 
   res.status(200).json({
     success: true,
@@ -45,7 +45,7 @@ export const updateGuru = async (req, res) => {
 
   console.log(updateData);
 
-  const updatedGuru = await guruService.updateGuru(Number(id_guru), updateData);
+  const updatedGuru = await guruService.updateGuru(parseInt(id_guru), updateData);
 
   res.status(200).json({ success: true, data: updatedGuru });
 };
@@ -53,7 +53,7 @@ export const updateGuru = async (req, res) => {
 export const deleteGuru = async (req, res) => {
   const { id_guru } = req.params;
 
-  await guruService.deleteGuru(Number(id_guru));
+  await guruService.deleteGuru(parseInt(id_guru));
 
   res.status(200).json({ success: true });
 };
