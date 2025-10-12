@@ -59,7 +59,7 @@ export const createPenjemput = async ({ id_user, id_siswa }, client) => {
   return result;
 };
 
-export const updatePenjemput = async (idPenjemput, { id_siswa, public_key }, client) => {
+export const updatePenjemput = async (id_penjemput, { id_siswa, public_key }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -78,7 +78,7 @@ export const updatePenjemput = async (idPenjemput, { id_siswa, public_key }, cli
     return null;
   }
 
-  values.push(idPenjemput);
+  values.push(id_penjemput);
   const query = `
     UPDATE Penjemput
     SET ${fields.join(", ")}

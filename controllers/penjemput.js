@@ -12,16 +12,15 @@ export const updatePenjemput = async (req, res) => {
   const { id_penjemput } = req.params;
   const updateData = req.body;
 
-  const responseBody = { success: true };
+  console.log(updateData);
+
   if (req.file) {
-    const url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
-    updateData.url_foto = url_foto;
-    responseBody.url_foto = url_foto;
+    updateData.url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
   }
 
-  await penjemputService.updatePenjemput(parseInt(id_penjemput), updateData);
+  const updatedPenjemput = await penjemputService.updatePenjemput(parseInt(id_penjemput), updateData);
 
-  res.status(200).json(responseBody);
+  res.status(200).json({ success: true, data: updatedPenjemput });
 };
 
 export const deletePenjemput = async (req, res) => {

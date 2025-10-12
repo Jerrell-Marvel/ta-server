@@ -87,3 +87,11 @@ get penjemput -> {
             "varian_kelas": "c"
         }
 }
+
+updatePenjemput -> {
+    "id_user": 66,
+        "username": "penjemput200",
+        "nama": "dodols",
+        "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png",
+        "role": "penjemput"
+}

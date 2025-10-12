@@ -1,5 +1,5 @@
 import * as userRepo from "../repositories/user.js";
-import * as penjempuRepo from "../repositories/penjemput.js";
+import * as penjemputRepo from "../repositories/penjemput.js";
 import { ConflictError, NotFoundError } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 import pool from "../db.js";
@@ -30,7 +30,7 @@ export const createPenjemput = async (penjemputData) => {
 
     console.log(newUser);
 
-    const newPenjemputQueryResult = await penjempuRepo.createPenjemput(
+    const newPenjemputQueryResult = await penjemputRepo.createPenjemput(
       {
         id_user: newUser.id_user,
         id_siswa,
@@ -53,11 +53,11 @@ export const createPenjemput = async (penjemputData) => {
   }
 };
 
-export const updatePenjemput = async (idPenjemput, updateData) => {
-  const getPenjemputQueryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+export const updatePenjemput = async (id_penjemput, updateData) => {
+  const getPenjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
 
   if (getPenjemputQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Penjemput with ID ${idPenjemput} not found.`);
+    throw new NotFoundError(`Penjemput with ID ${id_penjemput} not found.`);
   }
 
   const { username, nama, url_foto, id_siswa } = updateData;
@@ -68,7 +68,7 @@ export const updatePenjemput = async (idPenjemput, updateData) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await userRepo.updateUser(
+    const updateUserQueryResult = await userRepo.updateUser(
       idUser,
       {
         username,
@@ -77,16 +77,11 @@ export const updatePenjemput = async (idPenjemput, updateData) => {
       },
       client
     );
-
-    await penjempuRepo.updatePenjemput(
-      idPenjemput,
-      {
-        id_siswa,
-      },
-      client
-    );
+    const updatedUser = updateUserQueryResult.rows[0];
 
     await client.query("COMMIT");
+
+    return updatedUser;
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -96,7 +91,7 @@ export const updatePenjemput = async (idPenjemput, updateData) => {
 };
 
 export const deletePenjemput = async (idPenjemput) => {
-  const queryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+  const queryResult = await penjemputRepo.getPenjemputByIdPenjemput(idPenjemput);
   if (queryResult.rowCount === 0) {
     throw new NotFoundError(`Guru with ID ${idPenjemput} not found.`);
   }
@@ -110,14 +105,14 @@ export const deletePenjemput = async (idPenjemput) => {
 export const getAllPenjemputs = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
 
-  const penjemputsQueryResult = await penjempuRepo.getAllPenjemputs({
+  const penjemputsQueryResult = await penjemputRepo.getAllPenjemputs({
     limit,
     offset,
     search,
   });
   const penjemputs = penjemputsQueryResult.rows;
 
-  const totalPenjemputs = await penjempuRepo.getTotalPenjemputs({ search });
+  const totalPenjemputs = await penjemputRepo.getTotalPenjemputs({ search });
   const totalPages = Math.ceil(totalPenjemputs / limit);
 
   return {
