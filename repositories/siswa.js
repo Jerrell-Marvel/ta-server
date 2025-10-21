@@ -206,3 +206,18 @@ export const getPenjemputSiswa = async ({ id_siswa }) => {
   const result = await pool.query(query, [id_siswa]);
   return result;
 };
+
+export const getSiswaInKelas = async (id_kelas) => {
+  const query = `
+    SELECT
+        s.id_siswa,
+        s.nama,
+        s.url_foto
+    FROM Siswa s
+    WHERE s.is_active = 'true' AND s.id_kelas = $1;
+  `;
+
+  const result = await pool.query(query, [id_kelas]);
+
+  return result;
+};

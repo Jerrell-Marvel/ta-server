@@ -114,16 +114,17 @@ export const getAllKelas = async ({ page, limit }) => {
   };
 };
 
-export const getSingleKelas = async (idKelas) => {
-  const kelasQueryResult = await kelasRepo.getSingleKelas(idKelas);
+export const getSingleKelas = async (id_kelas) => {
+  const kelasQueryResult = await kelasRepo.getSingleKelas(id_kelas);
 
   if (kelasQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Kelas with id ${idKelas} not found`);
+    throw new NotFoundError(`Kelas with id ${id_kelas} not found`);
   }
 
-  const kelas = kelasQueryResult.rows;
+  const kelas = kelasQueryResult.rows[0];
 
-  console.log(kelas);
+  const siswaQueryResult = await siswaRepo.getSiswaInKelas(id_kelas);
+  const siswa = siswaQueryResult.rows;
 
-  return kelas;
+  return { ...kelas, siswa };
 };

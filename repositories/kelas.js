@@ -70,28 +70,24 @@ export const getAllKelas = async ({ limit, offset }) => {
   return result;
 };
 
-export const getSingleKelas = async (idKelas) => {
+export const getSingleKelas = async (id_kelas) => {
   const query = `
  SELECT
       k.id_kelas,
       k.nomor_kelas,
       k.varian_kelas,
-      u.nama AS wali_kelas_nama,
-      u.url_foto AS wali_kelas_url_foto,
-      s.id_siswa,
-      s.nama AS siswa_nama,
-      s.url_foto AS siswa_url_foto
+      k.wali_kelas_id_guru,
+      u.nama AS nama_wali_kelas,
+      u.url_foto AS url_foto_wali_kelas
     FROM
       Kelas k
     LEFT JOIN
       Guru g ON k.wali_kelas_id_guru = g.id_guru
     LEFT JOIN
       users u ON g.id_user = u.id_user AND u.is_active = TRUE
-    LEFT JOIN
-      Siswa s ON k.id_kelas = s.id_kelas AND s.is_active = TRUE
     WHERE
       k.id_kelas = $1 AND k.is_active = TRUE;
   `;
-  const result = await pool.query(query, [idKelas]);
+  const result = await pool.query(query, [id_kelas]);
   return result;
 };

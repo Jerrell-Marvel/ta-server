@@ -144,7 +144,7 @@ export const getAllGurus = async ({ limit, offset, search }) => {
   return result;
 };
 
-export const getTotalWaliKelas = async ({ search }) => {
+export const getTotalNotWaliKelas = async ({ search }) => {
   const queryParams = [];
   let searchQuery = "";
 
@@ -157,15 +157,15 @@ export const getTotalWaliKelas = async ({ search }) => {
     SELECT COUNT(*) AS total
     FROM Users u
     JOIN Guru g ON u.id_user = g.id_user
-    JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
-    WHERE u.role='guru' AND u.is_active='true' ${searchQuery}
+    LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+    WHERE u.role='guru' AND k.id_kelas IS NULL AND u.is_active='true' ${searchQuery}
   `;
 
   const countResult = await pool.query(query, queryParams);
   return parseInt(countResult.rows[0].total);
 };
 
-export const getAllWaliKelas = async ({ limit, offset, search }) => {
+export const getAllNotWaliKelas = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramIndex = 1;
   let searchQuery = "";
@@ -192,8 +192,8 @@ export const getAllWaliKelas = async ({ limit, offset, search }) => {
         k.varian_kelas
     FROM Guru g
     JOIN Users u ON g.id_user = u.id_user
-    JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
-    WHERE u.is_active = 'true'
+    LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
+    WHERE u.is_active = 'true' AND k.id_kelas IS NULL
     ${searchQuery}
     ORDER BY u.nama ASC
     ${pagination}

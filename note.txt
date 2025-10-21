@@ -95,3 +95,55 @@ updatePenjemput -> {
         "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png",
         "role": "penjemput"
 }
+
+getSingleSiswa -> {
+    {
+        "id_kelas": 10,
+        "nomor_kelas": 10,
+        "varian_kelas": "i",
+        "nama_wali_kelas": null,
+        "url_foto_wali_kelas": null,
+        "siswa": [
+            {
+                "id_siswa": 21,
+                "nama": "siswa1111",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 22,
+                "nama": "siswagg",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 24,
+                "nama": "siswaUpdated",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 23,
+                "nama": "siswa12234",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 25,
+                "nama": "siswa5",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 18,
+                "nama": "siswa300",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 19,
+                "nama": "siswa400",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 20,
+                "nama": "siswa500",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            }
+        ]
+    }
+}

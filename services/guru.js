@@ -129,9 +129,9 @@ export const getAllGurus = async ({ page, limit, wali_kelas, search }) => {
 
   let gurusQueryResult;
   let totalGurus;
-  if (wali_kelas === "true") {
-    totalGurus = await guruRepo.getTotalWaliKelas({ search });
-    gurusQueryResult = await guruRepo.getAllWaliKelas({
+  if (wali_kelas === "false") {
+    totalGurus = await guruRepo.getTotalNotWaliKelas({ search });
+    gurusQueryResult = await guruRepo.getAllNotWaliKelas({
       limit,
       offset,
       search,
