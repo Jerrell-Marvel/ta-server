@@ -13,7 +13,19 @@ export const createKelas = async ({ nomor_kelas, varian_kelas, wali_kelas_id_gur
   return result;
 };
 
-export const updateKelas = async (idKelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client) => {
+export const deleteKelas = async (id_kelas, client) => {
+  const query = `
+      UPDATE Kelas
+      SET is_active = false
+      WHERE id_kelas = $1;
+    `;
+
+  const executor = client ?? pool;
+  const result = await executor.query(query, [id_kelas]);
+  return result;
+};
+
+export const updateKelas = async (id_kelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -28,14 +40,16 @@ export const updateKelas = async (idKelas, { nomor_kelas, varian_kelas, wali_kel
     values.push(varian_kelas);
   }
 
-  fields.push(`wali_kelas_id_guru = $${paramCount++}`);
-  values.push(wali_kelas_id_guru ?? null);
+  if (wali_kelas_id_guru) {
+    fields.push(`wali_kelas_id_guru = $${paramCount++}`);
+    values.push(wali_kelas_id_guru);
+  }
 
   if (fields.length === 0) {
     return null;
   }
 
-  values.push(idKelas);
+  values.push(id_kelas);
   const query = `
     UPDATE Kelas
     SET ${fields.join(", ")}
@@ -90,4 +104,20 @@ export const getSingleKelas = async (id_kelas) => {
   `;
   const result = await pool.query(query, [id_kelas]);
   return result;
+};
+
+export const removeWaliKelasByGuruId = async (idGuru) => {
+  const query = `
+      UPDATE Kelas 
+      SET wali_kelas_id_guru = NULL 
+      WHERE wali_kelas_id_guru = $1
+    `;
+
+  try {
+    const result = await pool.query(query, [idGuru]);
+    return result;
+  } catch (error) {
+    console.error("Error removing wali_kelas by guru ID in repository:", error);
+    throw error;
+  }
 };

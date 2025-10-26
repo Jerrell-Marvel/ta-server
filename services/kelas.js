@@ -39,21 +39,21 @@ export const createKelas = async (kelasData) => {
   }
 };
 
-export const updateKelas = async (idKelas, updateData) => {
+export const updateKelas = async (id_kelas, updateData) => {
   const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
+    const updateKelasQueryResult = await kelasRepo.updateKelas(id_kelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
 
     if (updateKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+      throw new NotFoundError(`id kelas with ID ${id_kelas} not found`);
     }
 
     for (const id_siswa of tambah_siswa) {
-      await siswaRepo.updateSiswa(id_siswa, { id_kelas: idKelas }, client);
+      await siswaRepo.updateSiswa(id_siswa, { id_kelas: id_kelas }, client);
     }
 
     for (const id_siswa of remove_siswa) {
@@ -69,18 +69,19 @@ export const updateKelas = async (idKelas, updateData) => {
   }
 };
 
-export const deleteKelas = async (idKelas, updateData) => {
+export const deleteKelas = async (id_kelas) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { wali_kelas_id_guru: null }, client);
+    const deleteKelasQueryResult = await kelasRepo.deleteKelas(id_kelas, client);
 
-    if (updateKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+    await kelasRepo.updateKelas(id_kelas, { wali_kelas_id_guru: null }, client);
+
+    if (deleteKelasQueryResult.rowCount === 0) {
+      throw new NotFoundError(`id kelas with ID ${id_kelas} not found`);
     }
-
-    await siswaRepo.removeSiswasFromKelas(idKelas);
+    await siswaRepo.removeSiswasFromKelas(id_kelas, client);
 
     await client.query("COMMIT");
   } catch (error) {

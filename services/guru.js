@@ -102,17 +102,17 @@ export const updateGuru = async (id_guru, updateData) => {
   }
 };
 
-export const deleteGuru = async (idGuru) => {
-  const queryResult = await guruRepo.getGuruByIdGuru(idGuru);
+export const deleteGuru = async (id_guru) => {
+  const queryResult = await guruRepo.getGuruByIdGuru(id_guru);
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${idGuru} not found.`);
+    throw new NotFoundError(`Guru with ID ${id_guru} not found.`);
   }
 
   const idUser = queryResult.rows[0].id_user;
-  console.log(idUser);
-  await userRepo.deleteUser(idUser);
 
-  return;
+  await kelasRepo.removeWaliKelasByGuruId(id_guru);
+
+  await userRepo.deleteUser(idUser);
 };
 
 export const getSingleGuru = async (userId) => {

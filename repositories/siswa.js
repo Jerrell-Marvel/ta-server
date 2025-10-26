@@ -47,13 +47,13 @@ export const updateSiswa = async (idSiswa, { nama, url_foto, id_kelas }, client)
   return result;
 };
 
-export const deleteSiswa = async (idSiswa) => {
+export const deleteSiswa = async (id_siswa) => {
   const query = `
       UPDATE Siswa
       SET is_active = false
       WHERE id_siswa = $1;
     `;
-  const result = await pool.query(query, [idSiswa]);
+  const result = await pool.query(query, [id_siswa]);
   return result;
 };
 
