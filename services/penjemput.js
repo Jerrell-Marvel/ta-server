@@ -28,8 +28,6 @@ export const createPenjemput = async (penjemputData) => {
     );
     const newUser = newUserQueryResult.rows[0];
 
-    console.log(newUser);
-
     const newPenjemputQueryResult = await penjemputRepo.createPenjemput(
       {
         id_user: newUser.id_user,
@@ -62,37 +60,22 @@ export const updatePenjemput = async (id_penjemput, updateData) => {
 
   const { username, nama, url_foto } = updateData;
 
-  const existingUserQueryResult = await userRepo.getUserByUsername(username);
-  if (existingUserQueryResult.rowCount !== 0) {
-    throw new ConflictError("Username is already taken.");
+  if (username) {
+    const existingUserQueryResult = await userRepo.getUserByUsername(username);
+    if (existingUserQueryResult.rowCount !== 0) {
+      throw new ConflictError("Username is already taken.");
+    }
   }
-
   const penjemput = getPenjemputQueryResult.rows[0];
   const idUser = penjemput.id_user;
+  const updateUserQueryResult = await userRepo.updateUser(idUser, {
+    username,
+    nama,
+    url_foto,
+  });
+  const updatedUser = updateUserQueryResult.rows[0];
 
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const updateUserQueryResult = await userRepo.updateUser(
-      idUser,
-      {
-        username,
-        nama,
-        url_foto,
-      },
-      client
-    );
-    const updatedUser = updateUserQueryResult.rows[0];
-
-    await client.query("COMMIT");
-
-    return updatedUser;
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+  return updatedUser;
 };
 
 export const deletePenjemput = async (idPenjemput) => {

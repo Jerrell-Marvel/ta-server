@@ -22,6 +22,7 @@ export const findActiveKelasByNomorAndVarian = async ({ nomor_kelas, varian_kela
 
   const values = [nomor_kelas, varian_kelas];
   const executor = client ?? pool;
+
   const result = await executor.query(query, values);
 
   return result;
@@ -76,10 +77,24 @@ export const updateKelas = async (id_kelas, { nomor_kelas, varian_kelas, wali_ke
   return result;
 };
 
-export const getTotalKelas = async () => {
-  const query = `SELECT COUNT(*) AS total FROM kelas WHERE is_active='true'`;
-  const countResult = await pool.query(query);
-  return parseInt(countResult.rows[0].total);
+export const getTotalKelas = async ({ search }) => {
+  const queryParams = [];
+  let paramCount = 1;
+
+  let whereClauses = ["k.is_active = 'true'"];
+
+  if (!isNaN(search)) {
+    whereClauses.push(`k.nomor_kelas = $${paramCount++}`);
+    queryParams.push(search);
+  }
+
+  const whereString = whereClauses.join(" AND ");
+
+  const query = `SELECT COUNT(*) FROM kelas k WHERE ${whereString}`;
+
+  const result = await pool.query(query, queryParams);
+
+  return parseInt(result.rows[0].count, 10);
 };
 
 export const getAllKelas = async ({ limit, offset, search }) => {
@@ -88,14 +103,16 @@ export const getAllKelas = async ({ limit, offset, search }) => {
 
   let whereClauses = ["k.is_active = 'true'"];
 
-  if (search) {
-    whereClauses.push(`k.nomor_kelas ILIKE $${paramCount++}`);
-    queryParams.push(`%${search}%`);
+  if (!isNaN(search)) {
+    whereClauses.push(`k.nomor_kelas = $${paramCount++}`);
+    queryParams.push(search);
   }
 
   const whereString = whereClauses.join(" AND ");
+
   const pagination = `LIMIT $${paramCount++} OFFSET $${paramCount++}`;
   queryParams.push(limit, offset);
+
   const orderBy = "ORDER BY k.nomor_kelas ASC";
 
   const query = `

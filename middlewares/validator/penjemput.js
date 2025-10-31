@@ -3,7 +3,6 @@ import { validateObject } from "../../utils/validateObject.js";
 
 const createPenjemputRule = [
   { field: "username", displayName: "username" },
-  { field: "password", displayName: "password" },
   { field: "id_siswa", displayName: "id_siswa" },
   { field: "nama", displayName: "nama" },
 ];

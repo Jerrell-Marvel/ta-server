@@ -6,9 +6,11 @@ import { ConflictError } from "../errors/ConflictError.js";
 
 export const createKelas = async (kelasData) => {
   const { nomor_kelas, varian_kelas, id_guru, wali_kelas_id_guru, siswa } = kelasData;
-  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian(nomor_kelas, varian_kelas);
+  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian({ nomor_kelas, varian_kelas });
 
-  if (existingKelas) {
+  console.log(existingKelas);
+
+  if (existingKelas.rowCount !== 0) {
     throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
   }
 
@@ -27,9 +29,9 @@ export const createKelas = async (kelasData) => {
 export const updateKelas = async (id_kelas, updateData) => {
   const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
 
-  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian(nomor_kelas, varian_kelas);
+  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian({ nomor_kelas, varian_kelas });
 
-  if (existingKelas) {
+  if (existingKelas.rowCount !== 0) {
     throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
   }
 
@@ -85,14 +87,15 @@ export const deleteKelas = async (id_kelas) => {
 
 export const getAllKelas = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
+  const searchNumber = parseInt(search, 10);
   const kelasQueryResult = await kelasRepo.getAllKelas({
     limit,
     offset,
-    search,
+    search: searchNumber,
   });
   const kelas = kelasQueryResult.rows;
 
-  const totalKelas = await kelasRepo.getTotalKelas({ search });
+  const totalKelas = await kelasRepo.getTotalKelas({ search: searchNumber });
   const totalPages = Math.ceil(totalKelas / limit);
 
   return {

@@ -11,6 +11,11 @@ CREATE TABLE Users (
 );
 ALTER TABLE Users
 ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE Users
+DROP CONSTRAINT users_username_key;
+CREATE UNIQUE INDEX idx_users_unique_active_username
+ON Users (username)
+WHERE (is_active = TRUE);
 
 CREATE TABLE Guru (
     id_guru SERIAL PRIMARY KEY,
@@ -38,18 +43,27 @@ CREATE TABLE Kelas (
     varian_kelas CHAR(1) NOT NULL,
     wali_kelas_id_guru INT,
     CONSTRAINT fk_wali_kelas FOREIGN KEY (wali_kelas_id_guru) REFERENCES Guru (id_guru)
-    UNIQUE (nomor_kelas, varian_kelas)
 );
 ALTER TABLE Kelas
 ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-ALTER TABLE Kelas
-ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
+-- ALTER TABLE Kelas
+-- ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
 ALTER TABLE Kelas
 ADD COLUMN created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
 -- ALTER TABLE Kelas
 -- ADD CONSTRAINT check_nomor_kelas_range CHECK (nomor_kelas BETWEEN 1 AND 6);
 -- ALTER TABLE Kelas
 -- ADD CONSTRAINT check_varian_kelas_lowercase CHECK (varian_kelas ~ '^[a-z]$');
+
+-- ALTER TABLE Kelas
+-- DROP CONSTRAINT kelas_nomor_kelas_varian_kelas_key;
+
+-- ALTER TABLE Kelas
+-- DROP CONSTRAINT unique_kelas_is_active;
+
+CREATE UNIQUE INDEX idx_kelas_unique_active_class
+ON Kelas (nomor_kelas, varian_kelas)
+WHERE (is_active = TRUE);
 
 CREATE TABLE Siswa (
     id_siswa SERIAL PRIMARY KEY,

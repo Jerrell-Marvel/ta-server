@@ -65,9 +65,11 @@ export const updateGuru = async (id_guru, updateData) => {
 
   const { username, nama, url_foto, nomor_telepon } = updateData;
 
-  const existingUserQueryResult = await userRepo.getUserByUsername(username);
-  if (existingUserQueryResult.rowCount !== 0) {
-    throw new ConflictError("Username is already taken.");
+  if (username) {
+    const existingUserQueryResult = await userRepo.getUserByUsername(username);
+    if (existingUserQueryResult.rowCount !== 0) {
+      throw new ConflictError("Username is already taken.");
+    }
   }
 
   const guru = getGuruQueryResult.rows[0];
@@ -76,25 +78,32 @@ export const updateGuru = async (id_guru, updateData) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const updateUserQueryResult = await userRepo.updateUser(
-      idUser,
-      {
-        username,
-        nama,
-        url_foto,
-      },
-      client
-    );
-    const updatedUser = updateUserQueryResult.rows[0];
 
-    const updateGuruQueryResult = await guruRepo.updateGuru(
-      id_guru,
-      {
-        nomor_telepon,
-      },
-      client
-    );
-    const updatedGuru = updateGuruQueryResult.rows[0];
+    let updatedUser;
+    if (username || nama || url_foto) {
+      const updateUserQueryResult = await userRepo.updateUser(
+        idUser,
+        {
+          username,
+          nama,
+          url_foto,
+        },
+        client
+      );
+      updatedUser = updateUserQueryResult.rows[0];
+    }
+
+    let updatedGuru;
+    if (nomor_telepon) {
+      const updateGuruQueryResult = await guruRepo.updateGuru(
+        id_guru,
+        {
+          nomor_telepon,
+        },
+        client
+      );
+      updatedGuru = updateGuruQueryResult.rows[0];
+    }
 
     await client.query("COMMIT");
 
