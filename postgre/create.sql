@@ -44,6 +44,12 @@ ALTER TABLE Kelas
 ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
 ALTER TABLE Kelas
 ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
+ALTER TABLE Kelas
+ADD COLUMN created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+-- ALTER TABLE Kelas
+-- ADD CONSTRAINT check_nomor_kelas_range CHECK (nomor_kelas BETWEEN 1 AND 6);
+-- ALTER TABLE Kelas
+-- ADD CONSTRAINT check_varian_kelas_lowercase CHECK (varian_kelas ~ '^[a-z]$');
 
 CREATE TABLE Siswa (
     id_siswa SERIAL PRIMARY KEY,
@@ -55,6 +61,9 @@ CREATE TABLE Siswa (
 );
 ALTER TABLE Siswa
 ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE Siswa
+ADD COLUMN created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 CREATE TABLE Penjemput (
     id_penjemput SERIAL PRIMARY KEY,

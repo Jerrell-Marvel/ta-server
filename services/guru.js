@@ -2,6 +2,8 @@ import { ConflictError, NotFoundError } from "../errors/index.js";
 import pool from "../db.js";
 import * as userRepo from "../repositories/user.js";
 import * as guruRepo from "../repositories/guru.js";
+import * as kelasRepo from "../repositories/kelas.js";
+
 import bcrypt from "bcryptjs";
 
 export const createGuru = async (guruData) => {
@@ -19,6 +21,7 @@ export const createGuru = async (guruData) => {
     const newUserQueryResult = await userRepo.createUser(
       {
         username,
+        password: username,
         nama,
         url_foto,
         role: "guru",
@@ -61,6 +64,11 @@ export const updateGuru = async (id_guru, updateData) => {
   }
 
   const { username, nama, url_foto, nomor_telepon } = updateData;
+
+  const existingUserQueryResult = await userRepo.getUserByUsername(username);
+  if (existingUserQueryResult.rowCount !== 0) {
+    throw new ConflictError("Username is already taken.");
+  }
 
   const guru = getGuruQueryResult.rows[0];
   const idUser = guru.id_user;

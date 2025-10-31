@@ -2,45 +2,36 @@ import * as kelasRepo from "../repositories/kelas.js";
 import * as siswaRepo from "../repositories/siswa.js";
 import pool from "../db.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
+import { ConflictError } from "../errors/ConflictError.js";
 
 export const createKelas = async (kelasData) => {
   const { nomor_kelas, varian_kelas, id_guru, wali_kelas_id_guru, siswa } = kelasData;
+  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian(nomor_kelas, varian_kelas);
 
-  console.log("kldsjflsk", siswa);
-
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const newKelasQueryResult = await kelasRepo.createKelas(
-      {
-        nomor_kelas,
-        varian_kelas,
-        id_guru,
-        wali_kelas_id_guru,
-      },
-      client
-    );
-    const newKelas = newKelasQueryResult.rows[0];
-    const newKelasId = newKelas.id_kelas;
-
-    for (const id_siswa of siswa) {
-      await siswaRepo.updateSiswa(id_siswa, { id_kelas: newKelasId }, client);
-    }
-
-    await client.query("COMMIT");
-
-    return newKelas;
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
+  if (existingKelas) {
+    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
   }
+
+  const newKelasQueryResult = await kelasRepo.createKelas({
+    nomor_kelas,
+    varian_kelas,
+    id_guru,
+    wali_kelas_id_guru,
+  });
+
+  const newKelas = newKelasQueryResult.rows[0];
+
+  return newKelas;
 };
 
 export const updateKelas = async (id_kelas, updateData) => {
   const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
+
+  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian(nomor_kelas, varian_kelas);
+
+  if (existingKelas) {
+    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
+  }
 
   const client = await pool.connect();
   try {
@@ -92,16 +83,16 @@ export const deleteKelas = async (id_kelas) => {
   }
 };
 
-export const getAllKelas = async ({ page, limit }) => {
+export const getAllKelas = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
-
   const kelasQueryResult = await kelasRepo.getAllKelas({
     limit,
     offset,
+    search,
   });
   const kelas = kelasQueryResult.rows;
 
-  const totalKelas = await kelasRepo.getTotalKelas();
+  const totalKelas = await kelasRepo.getTotalKelas({ search });
   const totalPages = Math.ceil(totalKelas / limit);
 
   return {

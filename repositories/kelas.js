@@ -13,6 +13,20 @@ export const createKelas = async ({ nomor_kelas, varian_kelas, wali_kelas_id_gur
   return result;
 };
 
+export const findActiveKelasByNomorAndVarian = async ({ nomor_kelas, varian_kelas }, client) => {
+  const query = `SELECT id_kelas 
+           FROM Kelas 
+           WHERE nomor_kelas = $1 
+             AND varian_kelas = $2 
+             AND is_active = TRUE`;
+
+  const values = [nomor_kelas, varian_kelas];
+  const executor = client ?? pool;
+  const result = await executor.query(query, values);
+
+  return result;
+};
+
 export const deleteKelas = async (id_kelas, client) => {
   const query = `
       UPDATE Kelas
@@ -68,14 +82,33 @@ export const getTotalKelas = async () => {
   return parseInt(countResult.rows[0].total);
 };
 
-export const getAllKelas = async ({ limit, offset }) => {
+export const getAllKelas = async ({ limit, offset, search }) => {
   const queryParams = [];
   let paramCount = 1;
 
+  let whereClauses = ["k.is_active = 'true'"];
+
+  if (search) {
+    whereClauses.push(`k.nomor_kelas ILIKE $${paramCount++}`);
+    queryParams.push(`%${search}%`);
+  }
+
+  const whereString = whereClauses.join(" AND ");
   const pagination = `LIMIT $${paramCount++} OFFSET $${paramCount++}`;
   queryParams.push(limit, offset);
+  const orderBy = "ORDER BY k.nomor_kelas ASC";
 
-  const query = `SELECT k.id_kelas, k.nomor_kelas, k.varian_kelas, k.wali_kelas_id_guru, u.nama, u.url_foto, g.nomor_telepon FROM kelas k LEFT JOIN guru g ON k.wali_kelas_id_guru = g.id_guru LEFT JOIN users u ON u.id_user = g.id_user WHERE k.is_active = 'true' ${pagination}`;
+  const query = `
+    SELECT 
+      k.id_kelas, k.nomor_kelas, k.varian_kelas, k.wali_kelas_id_guru, 
+      u.nama, u.url_foto, g.nomor_telepon 
+    FROM kelas k 
+    LEFT JOIN guru g ON k.wali_kelas_id_guru = g.id_guru 
+    LEFT JOIN users u ON u.id_user = g.id_user 
+    WHERE ${whereString} 
+    ${orderBy} 
+    ${pagination}
+  `;
 
   console.log(query);
 

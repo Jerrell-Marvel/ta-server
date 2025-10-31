@@ -122,23 +122,23 @@ export const getAllGurus = async ({ limit, offset, search }) => {
 
   const query = `
     SELECT
-        g.id_guru,
-        u.id_user,
-        u.username,
-        u.nama,
-        u.url_foto,
-        g.nomor_telepon,
-        k.id_kelas,
-        k.nomor_kelas,
-        k.varian_kelas
+      g.id_guru,
+      u.id_user,
+      u.username,
+      u.nama,
+      u.url_foto,
+      g.nomor_telepon,
+      k.id_kelas,
+      k.nomor_kelas,
+      k.varian_kelas
     FROM Guru g
     JOIN Users u ON g.id_user = u.id_user
     LEFT JOIN Kelas k ON g.id_guru = k.wali_kelas_id_guru
     WHERE u.is_active = 'true'
     ${searchQuery}
-    ORDER BY u.nama ASC
+    ORDER BY u.created_at DESC
     ${pagination}
-  `;
+   `;
 
   const result = await pool.query(query, queryParams);
   return result;

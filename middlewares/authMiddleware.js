@@ -12,7 +12,7 @@ export const authMiddleware = (requiredRoles) => {
 
       const authHeader = req.headers["authorization"];
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return next(new BadRequestError("Authorization header with Bearer token must be provided"));
+        return next(new UnauthorizedError("Authorization header with Bearer token must be provided"));
       }
 
       const token = authHeader.split(" ")[1];
@@ -20,7 +20,7 @@ export const authMiddleware = (requiredRoles) => {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
 
       if (!requiredRoles.includes(payload.role)) {
-        return next(new ForbiddenError("You do not have permission to access this resource"));
+        return next(new UnauthorizedError("You do not have permission to access this resource"));
       }
 
       req.user = payload;

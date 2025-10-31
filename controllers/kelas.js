@@ -27,7 +27,9 @@ export const deleteKelas = async (req, res) => {
 export const getAllKelas = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const result = await kelasService.getAllKelas({ page, limit });
+  const search = req.query.search;
+
+  const result = await kelasService.getAllKelas({ page, limit, search });
 
   return res.status(200).json(result);
 };
