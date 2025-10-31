@@ -28,6 +28,22 @@ export const findActiveKelasByNomorAndVarian = async ({ nomor_kelas, varian_kela
   return result;
 };
 
+export const findActiveKelasByNomorAndVarianExclude = async ({ id_kelas, nomor_kelas, varian_kelas }, client) => {
+  const query = `SELECT id_kelas 
+           FROM Kelas 
+           WHERE nomor_kelas = $1 
+             AND varian_kelas = $2 
+             AND id_kelas != $3
+             AND is_active = TRUE`;
+
+  const values = [nomor_kelas, varian_kelas, id_kelas];
+  const executor = client ?? pool;
+
+  const result = await executor.query(query, values);
+
+  return result;
+};
+
 export const deleteKelas = async (id_kelas, client) => {
   const query = `
       UPDATE Kelas
@@ -55,10 +71,8 @@ export const updateKelas = async (id_kelas, { nomor_kelas, varian_kelas, wali_ke
     values.push(varian_kelas);
   }
 
-  if (wali_kelas_id_guru) {
-    fields.push(`wali_kelas_id_guru = $${paramCount++}`);
-    values.push(wali_kelas_id_guru);
-  }
+  fields.push(`wali_kelas_id_guru = $${paramCount++}`);
+  values.push(wali_kelas_id_guru);
 
   if (fields.length === 0) {
     return null;

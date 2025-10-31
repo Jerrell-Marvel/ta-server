@@ -2,7 +2,7 @@ CREATE TYPE user_role AS ENUM ('admin', 'guru', 'penjemput');
 
 CREATE TABLE Users (
     id_user SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     nama VARCHAR(255) NOT NULL,
     url_foto VARCHAR(255),
@@ -11,9 +11,8 @@ CREATE TABLE Users (
 );
 ALTER TABLE Users
 ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
-ALTER TABLE Users
-DROP CONSTRAINT users_username_key;
-CREATE UNIQUE INDEX idx_users_unique_active_username
+
+CREATE UNIQUE INDEX idx_active_users_username
 ON Users (username)
 WHERE (is_active = TRUE);
 
@@ -49,7 +48,7 @@ ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
 -- ALTER TABLE Kelas
 -- ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
 ALTER TABLE Kelas
-ADD COLUMN created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
 -- ALTER TABLE Kelas
 -- ADD CONSTRAINT check_nomor_kelas_range CHECK (nomor_kelas BETWEEN 1 AND 6);
 -- ALTER TABLE Kelas

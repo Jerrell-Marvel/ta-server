@@ -29,12 +29,6 @@ export const createKelas = async (kelasData) => {
 export const updateKelas = async (id_kelas, updateData) => {
   const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
 
-  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian({ nomor_kelas, varian_kelas });
-
-  if (existingKelas.rowCount !== 0) {
-    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
-  }
-
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -54,9 +48,14 @@ export const updateKelas = async (id_kelas, updateData) => {
     }
 
     await client.query("COMMIT");
-  } catch (error) {
+  } catch (err) {
     await client.query("ROLLBACK");
-    throw error;
+    // kepaksa, susah soalnya kalau enggak
+    if (err.code === "23505" && err.constraint === "idx_kelas_unique_active_class") {
+      throw new ConflictError("Duplicate nomor dan varian kelas");
+    } else {
+      throw err;
+    }
   } finally {
     client.release();
   }
@@ -67,9 +66,8 @@ export const deleteKelas = async (id_kelas) => {
   try {
     await client.query("BEGIN");
 
-    const deleteKelasQueryResult = await kelasRepo.deleteKelas(id_kelas, client);
-
     await kelasRepo.updateKelas(id_kelas, { wali_kelas_id_guru: null }, client);
+    const deleteKelasQueryResult = await kelasRepo.deleteKelas(id_kelas, client);
 
     if (deleteKelasQueryResult.rowCount === 0) {
       throw new NotFoundError(`id kelas with ID ${id_kelas} not found`);
