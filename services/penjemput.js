@@ -3,6 +3,7 @@ import * as penjemputRepo from "../repositories/penjemput.js";
 import { ConflictError, NotFoundError } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 import pool from "../db.js";
+import { hashPassword } from "../utils/hashPassword.js";
 
 export const createPenjemput = async (penjemputData) => {
   const { username, nama, url_foto, id_siswa } = penjemputData;
@@ -11,7 +12,7 @@ export const createPenjemput = async (penjemputData) => {
   if (existingUser.rowCount !== 0) {
     throw new ConflictError("Username is already taken.");
   }
-
+  const hashedPassword = await hashPassword(username);
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -21,7 +22,7 @@ export const createPenjemput = async (penjemputData) => {
         username,
         nama,
         url_foto,
-        password: username,
+        password: hashedPassword,
         role: "penjemput",
       },
       client
@@ -112,4 +113,18 @@ export const getAllPenjemputs = async ({ page, limit, search }) => {
       limit,
     },
   };
+};
+
+export const getPenjemputProfile = async (id_penjemput) => {
+  const { rows } = await penjemputRepo.getPenjemputProfileById(id_penjemput);
+
+  return rows[0];
+};
+
+export const updatePublicKey = async (id_penjemput, public_key) => {
+  const { rows } = await penjemputRepo.updatePenjemput(id_penjemput, {
+    public_key,
+  });
+
+  return rows[0];
 };

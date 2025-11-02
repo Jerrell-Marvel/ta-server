@@ -39,3 +39,23 @@ export const getAllPenjemputs = async (req, res) => {
 
   res.status(200).json(result);
 };
+
+export const updatePublicKey = async (req, res, next) => {
+  const { id_penjemput } = req.user;
+  const { public_key } = req.body;
+
+  const updatedPenjemput = await penjemputService.updatePublicKey(id_penjemput, public_key);
+
+  return res.status(200).json({ success: true });
+};
+
+export const getPenjemputProfile = async (req, res, next) => {
+  const { id_penjemput } = req.user;
+
+  const profile = await penjemputService.getPenjemputProfile(id_penjemput);
+
+  res.status(200).json({
+    success: true,
+    data: profile,
+  });
+};

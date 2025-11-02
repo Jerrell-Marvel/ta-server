@@ -185,3 +185,18 @@ export const removeWaliKelasByGuruId = async (idGuru) => {
     throw error;
   }
 };
+
+export const findKelasByIdGuru = async (id_guru) => {
+  const query = `
+    SELECT
+        id_kelas
+    FROM
+        Kelas
+    WHERE
+        wali_kelas_id_guru = $1
+        AND is_active = TRUE
+    LIMIT 1;
+  `;
+  const result = await pool.query(query, [id_guru]);
+  return result;
+};

@@ -54,6 +54,7 @@ import guruRoute from "./routes/guru.js";
 import siswaRoute from "./routes/siswa.js";
 import penjemputRoute from "./routes/penjemput.js";
 import kelasRoute from "./routes/kelas.js";
+import penjemputanRoute from "./routes/penjemputan.js";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
@@ -61,15 +62,16 @@ api.use("/guru", guruRoute);
 api.use("/siswa", siswaRoute);
 api.use("/penjemput", penjemputRoute);
 api.use("/kelas", kelasRoute);
+api.use("/penjemputan", penjemputanRoute);
 
 app.use("/api/v1", api);
 
 //Error handling
 app.use(errorHandler);
 
-// Run the server
+// Run  server
 const PORT = 5000;
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 app.listen(PORT, HOST, () => {
   try {
     console.log(`Server is running on port ${PORT}`);

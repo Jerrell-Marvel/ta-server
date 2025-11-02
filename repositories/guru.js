@@ -46,6 +46,47 @@ export const getGuruByUserId = async (userId) => {
   return result;
 };
 
+export const getGuruProfileById = async (id_guru) => {
+  const query = `
+    SELECT
+        g.id_guru,
+        g.nomor_telepon,
+        u.id_user,
+        u.username,
+        u.nama,
+        u.url_foto,
+        u.role,
+        u.created_at
+    FROM
+        Guru g
+    JOIN
+        Users u ON g.id_user = u.id_user
+    WHERE
+        g.id_guru = $1
+        AND u.is_active = TRUE;
+  `;
+
+  const result = await pool.query(query, [id_guru]);
+  return result;
+};
+
+export const isGuruWaliKelas = async (id_guru) => {
+  const query = `
+    SELECT EXISTS (
+        SELECT 1
+        FROM
+            Kelas
+        WHERE
+            wali_kelas_id_guru = $1
+            AND is_active = TRUE
+    );
+  `;
+
+  const { rows } = await pool.query(query, [id_guru]);
+
+  return rows[0].exists;
+};
+
 export const createGuru = async ({ id_user, nomor_telepon }, client) => {
   const query = `
     INSERT INTO Guru (id_user, nomor_telepon)

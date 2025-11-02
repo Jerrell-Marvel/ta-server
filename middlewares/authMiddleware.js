@@ -19,6 +19,8 @@ export const authMiddleware = (requiredRoles) => {
 
       const payload = jwt.verify(token, process.env.JWT_SECRET);
 
+      console.log(payload);
+
       if (!requiredRoles.includes(payload.role)) {
         return next(new UnauthorizedError("You do not have permission to access this resource"));
       }

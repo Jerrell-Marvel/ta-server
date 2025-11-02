@@ -14,7 +14,8 @@ export const getPenjemputByIdPenjemput = async (idPenjemput) => {
   u.role,
   u.is_active,
   p.id_penjemput,
-  p.id_siswa
+  p.id_siswa,
+  p.public_key
 FROM
   Users u
 INNER JOIN
@@ -22,6 +23,28 @@ INNER JOIN
 WHERE
   p.id_penjemput = $1 AND u.is_active = true;`;
   const result = await pool.query(query, [idPenjemput]);
+
+  return result;
+};
+
+export const getPenjemputByUserId = async (idUser) => {
+  const query = `SELECT
+  u.id_user,
+  u.username,
+  u.nama,
+  u.url_foto,
+  u.role,
+  u.is_active,
+  p.id_penjemput,
+  p.id_siswa,
+  p.public_key
+FROM
+  Users u
+INNER JOIN
+  Penjemput p ON u.id_user = p.id_user
+WHERE
+  u.id_user = $1 AND u.is_active = true;`;
+  const result = await pool.query(query, [idUser]);
 
   return result;
 };
@@ -89,6 +112,39 @@ export const updatePenjemput = async (id_penjemput, { id_siswa, public_key }, cl
   const executor = client ?? pool;
   const result = await executor.query(query, values);
   return result;
+};
+
+export const getPenjemputProfileById = async (id_penjemput) => {
+  const query = `
+    SELECT
+        p.id_penjemput,
+        
+        u.id_user,
+        u.username,
+        u.nama,
+        u.url_foto,
+        u.role,
+        
+        s.id_siswa,
+        s.nama AS nama_siswa,
+        s.url_foto AS foto_siswa,
+        
+        k.nomor_kelas,
+        k.varian_kelas
+    FROM
+        Penjemput p
+    JOIN
+        Users u ON p.id_user = u.id_user
+    LEFT JOIN 
+        Siswa s ON p.id_siswa = s.id_siswa
+    LEFT JOIN 
+        Kelas k ON s.id_kelas = k.id_kelas
+    WHERE
+        p.id_penjemput = $1
+        AND u.is_active = TRUE;
+  `;
+
+  return pool.query(query, [id_penjemput]);
 };
 
 export const getTotalPenjemputs = async ({ search }) => {

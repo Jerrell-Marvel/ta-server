@@ -18,7 +18,7 @@ export const createUser = async ({ username, nama, url_foto, role, password }, c
   return result;
 };
 
-export const updateUser = async (userId, { username, nama, url_foto }, client) => {
+export const updateUser = async (userId, { username, nama, url_foto, password }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -34,6 +34,11 @@ export const updateUser = async (userId, { username, nama, url_foto }, client) =
   if (url_foto) {
     fields.push(`url_foto = $${paramCount++}`);
     values.push(url_foto);
+  }
+
+  if (password) {
+    fields.push(`password = $${paramCount++}`);
+    values.push(password);
   }
 
   if (fields.length === 0) {

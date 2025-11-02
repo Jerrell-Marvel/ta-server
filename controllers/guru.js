@@ -59,3 +59,13 @@ export const deleteGuru = async (req, res) => {
 
   res.status(200).json({ success: true });
 };
+
+export const getGuruProfile = async (req, res) => {
+  const { id_guru } = req.user;
+
+  console.log("aaa", id_guru);
+
+  const profileGuru = await guruService.getGuruProfile(id_guru);
+
+  res.status(200).json({ success: true, data: profileGuru });
+};

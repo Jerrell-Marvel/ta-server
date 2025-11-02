@@ -96,3 +96,25 @@ CREATE TABLE Penjemputan (
     CONSTRAINT fk_penjemputan_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),
     CONSTRAINT fk_penjemputan_penjemput FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput)
 );
+
+CREATE TABLE Penjemputan (
+    id_penjemputan SERIAL PRIMARY KEY,
+
+    id_siswa INT NOT NULL,
+
+    id_penjemput INT NULL, 
+    status VARCHAR(100) NOT NULL,
+    tanggal DATE NOT NULL,
+    waktu_penjemputan_aktual TIMESTAMPTZ NULL,
+    CONSTRAINT fk_penjemputan_siswa 
+        FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),  
+    CONSTRAINT fk_penjemputan_penjemput 
+        FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput),
+    CONSTRAINT unique_siswa_per_hari UNIQUE (id_siswa, tanggal)
+);
+
+INSERT INTO Penjemputan (id_siswa, status, tanggal)
+SELECT id_siswa, 'menunggu penjemputan', CURRENT_DATE
+FROM Siswa
+WHERE is_active = TRUE
+ON CONFLICT (id_siswa, tanggal) DO NOTHING; 

@@ -41,6 +41,8 @@ export const getAllSiswas = async (req, res) => {
   res.status(200).json(result);
 };
 
+const getSiswaInKelas = async (req, res) => {};
+
 export const getSingleSiswa = async (req, res) => {
   const { id_siswa } = req.params;
 

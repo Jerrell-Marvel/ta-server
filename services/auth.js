@@ -5,6 +5,7 @@ import * as penjemputRepo from "../repositories/penjemput.js";
 import { UnauthorizedError } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { hashPassword } from "../utils/hashPassword.js";
 
 export const login = async ({ username, password }) => {
   const userQueryResult = await userRepo.getUserByUsername(username);
@@ -27,16 +28,28 @@ export const login = async ({ username, password }) => {
     role: user.role,
   };
 
+  let needPublicKey = false;
   if (user.role === "guru") {
-    const guruProfile = await guruRepo.getGuruByUserId(user.id_user);
-    tokenPayload.id_guru = guruProfile.id_guru;
+    const guruQueryResult = await guruRepo.getGuruByUserId(user.id_user);
+    tokenPayload.id_guru = guruQueryResult.rows[0].id_guru;
   } else if (user.role === "penjemput") {
-    const penjemputProfile = await penjemputRepo.getPenjemputByUserId(user.id_user);
-    tokenPayload.id_penjemput = penjemputProfile.id_penjemput;
-    tokenPayload.id_murid = penjemputProfile.id_murid;
+    const penjemputQueryResult = await penjemputRepo.getPenjemputByUserId(user.id_user);
+    const penjemput = penjemputQueryResult.rows[0];
+    tokenPayload.id_penjemput = penjemput.id_penjemput;
+    tokenPayload.id_murid = penjemput.id_murid;
+
+    if (!penjemput.public_key) {
+      needPublicKey = true;
+    }
   }
 
   const token = generateToken(tokenPayload);
 
-  return token;
+  return { token, role: user.role, need_public_key: needPublicKey };
+};
+
+export const changePassword = async (id_user, newPassword) => {
+  const hashedPassword = await hashPassword(newPassword);
+
+  const result = await userRepo.updateUser(id_user, { password: hashedPassword });
 };

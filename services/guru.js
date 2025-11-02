@@ -3,6 +3,7 @@ import pool from "../db.js";
 import * as userRepo from "../repositories/user.js";
 import * as guruRepo from "../repositories/guru.js";
 import * as kelasRepo from "../repositories/kelas.js";
+import { hashPassword } from "../utils/hashPassword.js";
 
 import bcrypt from "bcryptjs";
 
@@ -14,6 +15,8 @@ export const createGuru = async (guruData) => {
     throw new ConflictError("Username is already taken.");
   }
 
+  const hashedPassword = await hashPassword(username);
+
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -21,7 +24,7 @@ export const createGuru = async (guruData) => {
     const newUserQueryResult = await userRepo.createUser(
       {
         username,
-        password: username,
+        password: hashedPassword,
         nama,
         url_foto,
         role: "guru",
@@ -173,4 +176,25 @@ export const getAllGurus = async ({ page, limit, wali_kelas, search }) => {
       limit,
     },
   };
+};
+
+export const getGuruProfile = async (id_guru) => {
+  const [profileQueryResult, kelasQueryResult] = await Promise.all([guruRepo.getGuruProfileById(id_guru), kelasRepo.findKelasByIdGuru(id_guru)]);
+
+  if (profileQueryResult.rowCount === 0) {
+    throw new NotFoundError("Guru profile not found or user is inactive.");
+  }
+
+  const profileGuru = {
+    ...profileQueryResult.rows[0],
+    is_wali_kelas: kelasQueryResult.rowCount !== 0,
+    id_kelas: kelasQueryResult.rows[0]?.id_kelas,
+  };
+
+  if (kelasQueryResult.rowCount !== 0) {
+    profileGuru.is_wali_kelas = true;
+    profileGuru.id_kelas = kelasQueryResult.rows[0].id_kelas;
+  }
+
+  return profileGuru;
 };
