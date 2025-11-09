@@ -185,15 +185,16 @@ export const getGuruProfile = async (id_guru) => {
     throw new NotFoundError("Guru profile not found or user is inactive.");
   }
 
-  const profileGuru = {
+  let profileGuru = {
     ...profileQueryResult.rows[0],
-    is_wali_kelas: kelasQueryResult.rowCount !== 0,
-    id_kelas: kelasQueryResult.rows[0]?.id_kelas,
   };
 
   if (kelasQueryResult.rowCount !== 0) {
     profileGuru.is_wali_kelas = true;
-    profileGuru.id_kelas = kelasQueryResult.rows[0].id_kelas;
+    profileGuru = {
+      ...profileGuru,
+      ...kelasQueryResult.rows[0],
+    };
   }
 
   return profileGuru;

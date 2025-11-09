@@ -189,7 +189,7 @@ export const removeWaliKelasByGuruId = async (idGuru) => {
 export const findKelasByIdGuru = async (id_guru) => {
   const query = `
     SELECT
-        id_kelas
+        *
     FROM
         Kelas
     WHERE

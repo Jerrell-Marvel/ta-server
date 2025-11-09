@@ -5,7 +5,7 @@ export const getGuruIdByUserId = async (userId) => {
   return result;
 };
 
-export const getPenjemputByIdPenjemput = async (idPenjemput) => {
+export const getPenjemputByIdPenjemput = async (id_penjemput) => {
   const query = `SELECT
   u.id_user,
   u.username,
@@ -22,7 +22,7 @@ INNER JOIN
   Penjemput p ON u.id_user = p.id_user
 WHERE
   p.id_penjemput = $1 AND u.is_active = true;`;
-  const result = await pool.query(query, [idPenjemput]);
+  const result = await pool.query(query, [id_penjemput]);
 
   return result;
 };

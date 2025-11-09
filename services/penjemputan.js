@@ -3,24 +3,11 @@ import * as kelasRepo from "../repositories/kelas.js";
 import { BadRequestError } from "../errors/BadRequestError.js";
 import * as penjemputRepo from "../repositories/penjemput.js";
 import crypto from "crypto";
+import { NotFoundError } from "../errors/NotFoundError.js";
 
-export const getAllPenjemputanHariIni = async (id_guru) => {
-  const kelasQueryResult = await kelasRepo.findKelasByIdGuru(id_guru);
-
-  let penjemputans;
-  if (kelasQueryResult.rowCount !== 0) {
-    console.log("here");
-    const queryResult = await penjemputanRepo.getPenjemputanHariIniByKelas(kelasQueryResult.rows[0].id_kelas);
-    penjemputans = queryResult.rows;
-  } else {
-    console.log("should be here");
-    const queryResult = await penjemputanRepo.getAllPenjemputanHariIni();
-    penjemputans = queryResult.rows;
-  }
-
-  console.log("jejemput", penjemputans);
-
-  return penjemputans;
+export const getAllPenjemputanHariIni = async (filters) => {
+  const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
+  return queryResult.rows;
 };
 
 export const verifyAndCompletePenjemputan = async (qrCodeData) => {
@@ -56,5 +43,63 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
     throw new BadRequestError("Invalid signature");
   }
 
-  await penjemputanRepo.updateStatusBySiswa(id_siswa, "selesai");
+  await penjemputanRepo.completePenjemputan(id_siswa, penjemput.id_penjemput);
+};
+
+export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {
+  const queryCountResult = await penjemputanRepo.getTotalCountByStatus("sudah dekat");
+
+  const response = {
+    total_antrian_sudah_dekat: parseInt(queryCountResult.rows[0].count, 10),
+  };
+
+  if (role === "penjemput") {
+    const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
+    if (penjemputQueryResult.rowCount === 0) {
+      throw new NotFoundError("penjemput tidak ada");
+    }
+    const penjemput = penjemputQueryResult.rows[0];
+    const nomorAntrianQueryResult = await penjemputanRepo.getNomorAntrianPenjemput(penjemput.id_siswa);
+
+    if (nomorAntrianQueryResult.rowCount !== 0) {
+      response.nomor_antrian = parseInt(nomorAntrianQueryResult.rows[0].nomor_antrian, 10);
+    } else {
+      response.nomor_antrian = null;
+    }
+  }
+
+  console.log(response);
+
+  return response;
+};
+
+export const getDetailPenjemputanHariIni = async (id_penjemput) => {
+  const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
+  if (penjemputQueryResult.rowCount === 0) {
+    throw new NotFoundError("Invalid penjemput");
+  }
+  const penjemput = penjemputQueryResult.rows[0];
+  const detailPenjemputanQueryResult = await penjemputanRepo.findPenjemputanHariIniByIdSiswa(penjemput.id_siswa);
+
+  if (detailPenjemputanQueryResult.rowCount === 0) {
+    throw new NotFoundError("Tidak ada penjemputan");
+  }
+
+  return {
+    ...detailPenjemputanQueryResult.rows[0],
+    id_penjemput: penjemput.id_penjemput,
+    nama_penjemput: penjemput.nama,
+    foto_penjemput: penjemput.url_foto,
+  };
+};
+
+export const updateStatusPenjemputan = async (id_penjemput, status) => {
+  const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
+
+  if (penjemputQueryResult.rowCount === 0) {
+    throw new NotFoundError("Data penjemput tidak ditemukan.");
+  }
+  const penjemput = penjemputQueryResult.rows[0];
+
+  await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 };
