@@ -40,11 +40,11 @@ export const getAllPenjemputs = async (req, res) => {
   res.status(200).json(result);
 };
 
-export const updatePublicKey = async (req, res, next) => {
+export const addPublicKey = async (req, res, next) => {
   const { id_penjemput } = req.user;
-  const { public_key } = req.body;
+  const { public_key, device_id, device_name } = req.body;
 
-  const updatedPenjemput = await penjemputService.updatePublicKey(id_penjemput, public_key);
+  const updatedPenjemput = await penjemputService.addPublicKey(id_penjemput, { public_key, device_id, device_name });
 
   return res.status(200).json({ success: true });
 };

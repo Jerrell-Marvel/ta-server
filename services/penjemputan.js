@@ -13,7 +13,7 @@ export const getAllPenjemputanHariIni = async (filters) => {
 };
 
 export const verifyAndCompletePenjemputan = async (qrCodeData) => {
-  const { id_penjemput, exp } = qrCodeData.data;
+  const { id_penjemput, exp, device_id, device_name } = qrCodeData.data;
   const signature = qrCodeData.signature;
 
   const expTimestamp = exp * 1000;
@@ -24,13 +24,18 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   console.log("idm", id_penjemput);
 
   const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
-  console.log("rowie", penjemputQueryResult.rows);
-  const penjemput = penjemputQueryResult.rows[0];
-  console.log(penjemput);
-  const { public_key, id_siswa } = penjemput;
-
-  if (!public_key) {
+  if (penjemputQueryResult.rowCount === 0) {
+    throw new NotFoundError("Penjemput tidak ditemukan.");
   }
+  const penjemput = penjemputQueryResult.rows[0];
+
+  const publicKeyQueryResult = await penjemputRepo.getPublicKeyByDeviceAndPenjemput(device_id, id_penjemput);
+
+  if (publicKeyQueryResult.rowCount === 0) {
+    throw new BadRequestError("Gagal verifikasi QR, key berbeda.");
+  }
+
+  const publicKey = publicKeyQueryResult.rows[0].public_key;
 
   const payloadString = JSON.stringify(qrCodeData.data);
 
@@ -39,13 +44,13 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   verify.update(payloadString);
   verify.end();
 
-  const isSignatureValid = verify.verify(public_key, signature, "base64");
+  const isSignatureValid = verify.verify(publicKey, signature, "base64");
 
   if (!isSignatureValid) {
     throw new BadRequestError("Invalid signature");
   }
 
-  await penjemputanRepo.completePenjemputan(id_siswa, penjemput.id_penjemput);
+  await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
 };
 
 export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {

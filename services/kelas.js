@@ -11,7 +11,7 @@ export const createKelas = async (kelasData) => {
   console.log(existingKelas);
 
   if (existingKelas.rowCount !== 0) {
-    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} already exists`);
+    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} sudah ada.`);
   }
 
   const newKelasQueryResult = await kelasRepo.createKelas({
@@ -36,7 +36,7 @@ export const updateKelas = async (id_kelas, updateData) => {
     const updateKelasQueryResult = await kelasRepo.updateKelas(id_kelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
 
     if (updateKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${id_kelas} not found`);
+      throw new NotFoundError(`Kelas dengan ID ${id_kelas} tidak ditemukan.`);
     }
 
     for (const id_siswa of tambah_siswa) {
@@ -52,7 +52,7 @@ export const updateKelas = async (id_kelas, updateData) => {
     await client.query("ROLLBACK");
     // kepaksa, susah soalnya kalau enggak
     if (err.code === "23505" && err.constraint === "idx_kelas_unique_active_class") {
-      throw new ConflictError("Duplicate nomor dan varian kelas");
+      throw new ConflictError("Kelas sudah ada sebelumnya.");
     } else {
       throw err;
     }

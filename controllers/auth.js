@@ -1,9 +1,9 @@
 import * as authService from "../services/auth.js";
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, device_id, device_name, notification_token } = req.body;
 
-  const result = await authService.login({ username, password });
+  const result = await authService.login({ username, password, device_id, device_name, notification_token });
   console.log(result);
   return res.json(result);
 };

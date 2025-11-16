@@ -121,10 +121,8 @@ export const getPenjemputProfile = async (id_penjemput) => {
   return rows[0];
 };
 
-export const updatePublicKey = async (id_penjemput, public_key) => {
-  const { rows } = await penjemputRepo.updatePenjemput(id_penjemput, {
-    public_key,
-  });
+export const addPublicKey = async (id_penjemput, { public_key, device_id, device_name }) => {
+  const { rows } = await penjemputRepo.insertPublicKey({ id_penjemput, public_key, device_id, device_name });
 
   return rows[0];
 };

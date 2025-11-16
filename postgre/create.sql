@@ -27,14 +27,16 @@
 
     ALTER TABLE Guru
     DROP COLUMN notification_id;
-    CREATE TABLE NotificationToken (
+    CREATE TABLE Notification_Token (
         id_notification_token SERIAL PRIMARY KEY,
-        id_user INT NOT NULL,
-        token VARCHAR(255) UNIQUE NOT NULL,
+        id_guru INT NOT NULL,
+        device_id VARCHAR(255),
         device_name VARCHAR(100),
+        notification_token VARCHAR(100) UNIQUE NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT fk_tokens_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
+        CONSTRAINT fk_tokens_guru FOREIGN KEY(id_guru) REFERENCES Guru(id_guru) ON DELETE CASCADE
     );
+    -- ALTER TABLE NotificationToken ADD COLUMN devide_id VARCHAR(100) NOT NULL;
 
     ALTER TABLE NotificationToken
     DROP CONSTRAINT fk_tokens_user;
@@ -94,6 +96,22 @@
         id_siswa INT, 
         CONSTRAINT fk_penjemput_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE,
         CONSTRAINT fk_penjemput_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa)
+    );
+
+    ALTER TABLE Penjemput
+    DROP COLUMN public_key;
+
+    CREATE TABLE Public_Key (
+    id_public_key SERIAL PRIMARY KEY,
+    id_penjemput INT NOT NULL, 
+    public_key TEXT NOT NULL,
+    device_id TEXT,
+    device_name TEXT,
+
+    CONSTRAINT fk_kunci_publik_penjemput 
+        FOREIGN KEY(id_penjemput) 
+        REFERENCES Penjemput(id_penjemput) 
+        ON DELETE CASCADE
     );
 
     CREATE TABLE Penjemputan (

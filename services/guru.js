@@ -12,7 +12,7 @@ export const createGuru = async (guruData) => {
 
   const existingUserQueryResult = await userRepo.getUserByUsername(username);
   if (existingUserQueryResult.rowCount !== 0) {
-    throw new ConflictError("Username is already taken.");
+    throw new ConflictError("Username sudah diambil.");
   }
 
   const hashedPassword = await hashPassword(username);
@@ -63,7 +63,7 @@ export const updateGuru = async (id_guru, updateData) => {
   const getGuruQueryResult = await guruRepo.getGuruByIdGuru(id_guru);
 
   if (getGuruQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${id_guru} not found.`);
+    throw new NotFoundError(`Guru dengan ID ${id_guru} tidak ditemukan.`);
   }
 
   const { username, nama, url_foto, nomor_telepon } = updateData;
@@ -71,7 +71,7 @@ export const updateGuru = async (id_guru, updateData) => {
   if (username) {
     const existingUserQueryResult = await userRepo.getUserByUsername(username);
     if (existingUserQueryResult.rowCount !== 0) {
-      throw new ConflictError("Username is already taken.");
+      throw new ConflictError("Username sudah diambil.");
     }
   }
 
@@ -125,7 +125,7 @@ export const updateGuru = async (id_guru, updateData) => {
 export const deleteGuru = async (id_guru) => {
   const queryResult = await guruRepo.getGuruByIdGuru(id_guru);
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${id_guru} not found.`);
+    throw new NotFoundError(`Guru dengan ID ${id_guru} tidak ditemukan.`);
   }
 
   const idUser = queryResult.rows[0].id_user;
@@ -139,7 +139,7 @@ export const getSingleGuru = async (userId) => {
   const getGuruQueryResult = await guruRepo.getGuruByUserId(userId);
 
   if (getGuruQueryResult.rowCount === 0) {
-    throw new NotFoundError(`No guru with id ${userId} found`);
+    throw new NotFoundError(`Guru dengan ID ${userId} tidak ditemukan.`);
   }
   return getGuruQueryResult.rows[0];
 };
@@ -182,7 +182,7 @@ export const getGuruProfile = async (id_guru) => {
   const [profileQueryResult, kelasQueryResult] = await Promise.all([guruRepo.getGuruProfileById(id_guru), kelasRepo.findKelasByIdGuru(id_guru)]);
 
   if (profileQueryResult.rowCount === 0) {
-    throw new NotFoundError("Guru profile not found or user is inactive.");
+    throw new NotFoundError("Profile guru tidak ditemukan.");
   }
 
   let profileGuru = {

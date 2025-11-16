@@ -14,8 +14,7 @@ export const getPenjemputByIdPenjemput = async (id_penjemput) => {
   u.role,
   u.is_active,
   p.id_penjemput,
-  p.id_siswa,
-  p.public_key
+  p.id_siswa
 FROM
   Users u
 INNER JOIN
@@ -36,8 +35,7 @@ export const getPenjemputByUserId = async (idUser) => {
   u.role,
   u.is_active,
   p.id_penjemput,
-  p.id_siswa,
-  p.public_key
+  p.id_siswa
 FROM
   Users u
 INNER JOIN
@@ -204,5 +202,49 @@ export const getAllPenjemputs = async ({ limit, offset, search }) => {
   `;
 
   const result = await pool.query(query, queryParams);
+  return result;
+};
+
+export const insertPublicKey = async ({ id_penjemput, public_key, device_id, device_name }, client) => {
+  const query = `
+    INSERT INTO Public_Key (id_penjemput, public_key, device_id, device_name)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id_public_key, id_penjemput, device_name, device_id;
+  `;
+
+  const values = [id_penjemput, public_key, device_id ?? null, device_name ?? null];
+
+  const executor = client ?? pool;
+
+  const result = await executor.query(query, values);
+
+  return result;
+};
+
+export const findPublicKeyByDevice = async (id_penjemput, device_id, client) => {
+  const query = `
+    SELECT * FROM Public_Key
+    WHERE id_penjemput = $1 AND device_id = $2;
+  `;
+
+  const values = [id_penjemput, device_id];
+
+  const executor = client ?? pool;
+
+  const result = await executor.query(query, values);
+
+  return result;
+};
+
+export const getPublicKeyByDeviceAndPenjemput = async (device_id, idPenjemput) => {
+  const query = `
+    SELECT * 
+    FROM Public_Key 
+    WHERE device_id = $1 AND id_penjemput = $2;
+  `;
+
+  const values = [device_id, idPenjemput];
+  const result = await pool.query(query, values);
+
   return result;
 };
