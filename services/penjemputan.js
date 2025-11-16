@@ -4,6 +4,8 @@ import { BadRequestError } from "../errors/BadRequestError.js";
 import * as penjemputRepo from "../repositories/penjemput.js";
 import crypto from "crypto";
 import { NotFoundError } from "../errors/NotFoundError.js";
+import * as guruRepo from "../repositories/guru.js";
+import * as notificationRepo from "../repositories/notification.js";
 
 export const getAllPenjemputanHariIni = async (filters) => {
   const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
@@ -102,4 +104,30 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   const penjemput = penjemputQueryResult.rows[0];
 
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
+
+  if (status === "sudah dekat") {
+    const siswaDetailsResult = await guruRepo.getWaliKelasDetailsByIdSiswa(id_siswa);
+
+    if (siswaDetailsResult.rowCount > 0) {
+      const { wali_kelas_id_guru, nama_siswa } = siswaDetailsResult.rows[0];
+
+      const tokensResult = await notificationRepo.getNotificationTokensByIdGuru(wali_kelas_id_guru);
+
+      if (tokensResult.rowCount > 0) {
+        const tokens = tokensResult.rows.map((row) => row.token);
+
+        const message = {
+          to: tokens,
+          sound: "default",
+          title: "Siswa Akan Dijemput",
+          body: `${nama_siswa} akan segera dijemput. Penjemput sudah dekat.`,
+          data: { id_siswa: id_siswa, status: status },
+        };
+
+        sendPushNotification(message).catch((error) => {
+          console.error("fail", error);
+        });
+      }
+    }
+  }
 };

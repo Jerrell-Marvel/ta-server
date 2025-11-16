@@ -1,5 +1,6 @@
 import { BadRequestError } from "../errors/BadRequestError.js";
 import * as guruService from "../services/guru.js";
+import * as notificationService from "../services/notification.js";
 
 export const getAllGurus = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -68,4 +69,18 @@ export const getGuruProfile = async (req, res) => {
   const profileGuru = await guruService.getGuruProfile(id_guru);
 
   res.status(200).json({ success: true, data: profileGuru });
+};
+
+export const registerNotificationToken = async (req, res) => {
+  const { token, deviceName } = req.body;
+
+  const { id_guru } = req.user;
+
+  const result = await notificationService.registerToken(id_guru, token, deviceName);
+
+  res.status(201).json({
+    success: true,
+    message: "Token notifikasi berhasil terdaftar.",
+    data: result.rows[0],
+  });
 };

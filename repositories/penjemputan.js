@@ -1,4 +1,3 @@
-// Asumsi koneksi pool database Anda di-export dari sini
 import pool from "../db.js";
 
 const PENJEMPUT_QUERY = `
@@ -93,7 +92,7 @@ export async function completePenjemputan(id_siswa, id_penjemput) {
      status = 'selesai',
      id_penjemput = $2,
      waktu_penjemputan_aktual = NOW(),
-     waktu_status_sudah_dekat = NULL -- Menghapus dari antrian 'sudah dekat'
+     waktu_status_sudah_dekat = NULL
     WHERE 
      id_siswa = $1 AND tanggal = CURRENT_DATE
     RETURNING *;

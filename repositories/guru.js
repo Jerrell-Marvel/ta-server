@@ -243,3 +243,20 @@ export const getAllNotWaliKelas = async ({ limit, offset, search }) => {
   const result = await pool.query(query, queryParams);
   return result;
 };
+
+export async function getWaliKelasDetailsByIdSiswa(id_siswa) {
+  const query = `
+    SELECT
+      k.wali_kelas_id_guru,
+      s.nama AS nama_siswa
+    FROM Siswa s
+    JOIN Kelas k ON s.id_kelas = k.id_kelas
+    WHERE s.id_siswa = $1 
+      AND k.wali_kelas_id_guru IS NOT NULL 
+      AND s.is_active = TRUE;
+  `;
+
+  const values = [id_siswa];
+  const result = await pool.query(query, values);
+  return result;
+}

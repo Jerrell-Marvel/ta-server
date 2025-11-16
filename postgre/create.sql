@@ -36,6 +36,15 @@
         CONSTRAINT fk_tokens_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
     );
 
+    ALTER TABLE NotificationToken
+    DROP CONSTRAINT fk_tokens_user;
+    ALTER TABLE NotificationToken
+    RENAME COLUMN id_user TO id_guru;
+    ALTER TABLE NotificationToken
+    ADD CONSTRAINT fk_tokens_guru FOREIGN KEY (id_guru)
+        REFERENCES Guru(id_guru) ON DELETE CASCADE;
+
+
     CREATE TABLE Kelas (
         id_kelas SERIAL PRIMARY KEY,
         nomor_kelas INT NOT NULL,

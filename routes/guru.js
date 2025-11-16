@@ -2,7 +2,7 @@
 
 import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { createGuru, getAllGurus, getSingleGuru, updateGuru, deleteGuru, getGuruProfile } from "../controllers/guru.js";
+import { createGuru, getAllGurus, getSingleGuru, updateGuru, deleteGuru, getGuruProfile, registerNotificationToken } from "../controllers/guru.js";
 import { createGuruValidator } from "../middlewares/validator/guru.js";
 import { fileUpload } from "../middlewares/fileUpload.js";
 
@@ -16,5 +16,6 @@ router.patch("/:id_guru", authMiddleware(["admin"]), fileUpload("./public").sing
 router.delete("/:id_guru", authMiddleware(["admin"]), deleteGuru);
 
 router.get("/client/profile", authMiddleware(["guru"]), getGuruProfile);
+router.post("/client/notification", authMiddleware(["guru"]), registerNotificationToken);
 
 export default router;
