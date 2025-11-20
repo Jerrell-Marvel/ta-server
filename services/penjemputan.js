@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { NotFoundError } from "../errors/NotFoundError.js";
 import * as guruRepo from "../repositories/guru.js";
 import * as notificationRepo from "../repositories/notification.js";
+import { sendPushNotification } from "../utils/sendNotification.js";
 
 export const getAllPenjemputanHariIni = async (filters) => {
   const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
@@ -115,7 +116,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 
   if (status === "sudah dekat") {
-    const siswaDetailsResult = await guruRepo.getWaliKelasDetailsByIdSiswa(id_siswa);
+    const siswaDetailsResult = await guruRepo.getWaliKelasDetailsByIdSiswa(penjemput.id_siswa);
 
     if (siswaDetailsResult.rowCount > 0) {
       const { wali_kelas_id_guru, nama_siswa } = siswaDetailsResult.rows[0];
