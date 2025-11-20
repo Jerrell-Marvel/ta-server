@@ -1,16 +1,16 @@
 import pool from "../db.js";
 
 export const getUserByUsername = async (username) => {
-  return pool.query("SELECT id_user, username, password, nama, role FROM Users WHERE username = $1", [username]);
+  return pool.query("SELECT id_user, username, password, nama, role FROM Users WHERE username = $1 AND is_active=true", [username]);
 };
 
-export const createUser = async ({ username, nama, url_foto, role }, client) => {
+export const createUser = async ({ username, nama, url_foto, role, password }, client) => {
   const query = `
-    INSERT INTO Users (username, nama, url_foto, role)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id_user, username, nama;
+    INSERT INTO Users (username, nama, url_foto, role, password)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id_user, username, role, url_foto, nama;
   `;
-  const values = [username, nama, url_foto, role];
+  const values = [username, nama, url_foto, role, password];
 
   const executor = client ?? pool;
   const result = await executor.query(query, values);
@@ -18,7 +18,7 @@ export const createUser = async ({ username, nama, url_foto, role }, client) => 
   return result;
 };
 
-export const updateUser = async (userId, { username, nama, url_foto }, client) => {
+export const updateUser = async (userId, { username, nama, url_foto, password }, client) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -36,6 +36,11 @@ export const updateUser = async (userId, { username, nama, url_foto }, client) =
     values.push(url_foto);
   }
 
+  if (password) {
+    fields.push(`password = $${paramCount++}`);
+    values.push(password);
+  }
+
   if (fields.length === 0) {
     return null;
   }
@@ -45,7 +50,7 @@ export const updateUser = async (userId, { username, nama, url_foto }, client) =
     UPDATE Users
     SET ${fields.join(", ")}
     WHERE id_user = $${paramCount}
-    RETURNING id_user, username, nama, url_foto, role, is_active;
+    RETURNING id_user, username, nama, url_foto, role;
   `;
 
   const executor = client ?? pool;

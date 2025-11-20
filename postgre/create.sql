@@ -1,76 +1,158 @@
-CREATE TYPE user_role AS ENUM ('admin', 'guru', 'penjemput');
+    CREATE TYPE user_role AS ENUM ('admin', 'guru', 'penjemput');
 
-CREATE TABLE Users (
-    id_user SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    nama VARCHAR(255) NOT NULL,
-    url_foto VARCHAR(255),
-    role user_role NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-ALTER TABLE Users
-ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+    CREATE TABLE Users (
+        id_user SERIAL PRIMARY KEY,
+        username VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        nama VARCHAR(255) NOT NULL,
+        url_foto VARCHAR(255),
+        role user_role NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    ALTER TABLE Users
+    ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
-CREATE TABLE Guru (
-    id_guru SERIAL PRIMARY KEY,
-    id_user INT UNIQUE NOT NULL,
-    notification_id VARCHAR(255),
-    CONSTRAINT fk_guru_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
-);
-ALTER TABLE Guru
-ADD COLUMN nomor_telepon VARCHAR(20);
+    CREATE UNIQUE INDEX idx_active_users_username
+    ON Users (username)
+    WHERE (is_active = TRUE);
 
-ALTER TABLE Guru
-DROP COLUMN notification_id;
-CREATE TABLE NotificationToken (
-    id_notification_token SERIAL PRIMARY KEY,
-    id_user INT NOT NULL,
-    token VARCHAR(255) UNIQUE NOT NULL,
-    device_name VARCHAR(100),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_tokens_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
-);
+    CREATE TABLE Guru (
+        id_guru SERIAL PRIMARY KEY,
+        id_user INT UNIQUE NOT NULL,
+        notification_id VARCHAR(255),
+        CONSTRAINT fk_guru_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE
+    );
+    ALTER TABLE Guru
+    ADD COLUMN nomor_telepon VARCHAR(20);
 
-CREATE TABLE Kelas (
-    id_kelas SERIAL PRIMARY KEY,
-    nomor_kelas INT NOT NULL,
-    varian_kelas CHAR(1) NOT NULL,
-    wali_kelas_id_guru INT,
-    CONSTRAINT fk_wali_kelas FOREIGN KEY (wali_kelas_id_guru) REFERENCES Guru (id_guru)
-    UNIQUE (nomor_kelas, varian_kelas)
-);
-ALTER TABLE Kelas
-ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-ALTER TABLE Kelas
-ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
+    ALTER TABLE Guru
+    DROP COLUMN notification_id;
+    CREATE TABLE Notification_Token (
+        id_notification_token SERIAL PRIMARY KEY,
+        id_guru INT NOT NULL,
+        device_id VARCHAR(255),
+        device_name VARCHAR(100),
+        notification_token VARCHAR(100) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_tokens_guru FOREIGN KEY(id_guru) REFERENCES Guru(id_guru) ON DELETE CASCADE
+    );
+    -- ALTER TABLE NotificationToken ADD COLUMN devide_id VARCHAR(100) NOT NULL;
 
-CREATE TABLE Siswa (
-    id_siswa SERIAL PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    url_foto VARCHAR(255) NOT NULL,
-    id_kelas INT,
-    CONSTRAINT fk_id_kelas FOREIGN KEY (id_kelas) REFERENCES Kelas (id_kelas)
-    
-);
-ALTER TABLE Siswa
-ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+    -- ALTER TABLE NotificationToken
+    -- DROP CONSTRAINT fk_tokens_user;
+    -- ALTER TABLE NotificationToken
+    -- RENAME COLUMN id_user TO id_guru;
+    ALTER TABLE NotificationToken
+    ADD CONSTRAINT fk_tokens_guru FOREIGN KEY (id_guru)
+        REFERENCES Guru(id_guru) ON DELETE CASCADE;
 
-CREATE TABLE Penjemput (
-    id_penjemput SERIAL PRIMARY KEY,
-    id_user INT UNIQUE NOT NULL,
-    public_key TEXT,
-    id_siswa INT, 
-    CONSTRAINT fk_penjemput_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE,
-    CONSTRAINT fk_penjemput_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa)
-);
 
-CREATE TABLE Penjemputan (
-    id_penjemputan SERIAL PRIMARY KEY,
-    id_siswa INT NOT NULL,
-    id_penjemput INT NOT NULL,
-    status VARCHAR(100) NOT NULL,
-    tanggal_penjemputan TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT fk_penjemputan_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),
-    CONSTRAINT fk_penjemputan_penjemput FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput)
-);
+    CREATE TABLE Kelas (
+        id_kelas SERIAL PRIMARY KEY,
+        nomor_kelas INT NOT NULL,
+        varian_kelas CHAR(1) NOT NULL,
+        wali_kelas_id_guru INT,
+        CONSTRAINT fk_wali_kelas FOREIGN KEY (wali_kelas_id_guru) REFERENCES Guru (id_guru)
+    );
+    ALTER TABLE Kelas
+    ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+    -- ALTER TABLE Kelas
+    -- ADD CONSTRAINT unique_kelas_is_active UNIQUE (nomor_kelas, varian_kelas, is_active);
+    ALTER TABLE Kelas
+    ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+    -- ALTER TABLE Kelas
+    -- ADD CONSTRAINT check_nomor_kelas_range CHECK (nomor_kelas BETWEEN 1 AND 6);
+    -- ALTER TABLE Kelas
+    -- ADD CONSTRAINT check_varian_kelas_lowercase CHECK (varian_kelas ~ '^[a-z]$');
+
+    -- ALTER TABLE Kelas
+    -- DROP CONSTRAINT kelas_nomor_kelas_varian_kelas_key;
+
+    -- ALTER TABLE Kelas
+    -- DROP CONSTRAINT unique_kelas_is_active;
+
+    CREATE UNIQUE INDEX idx_kelas_unique_active_class
+    ON Kelas (nomor_kelas, varian_kelas)
+    WHERE (is_active = TRUE);
+
+    CREATE TABLE Siswa (
+        id_siswa SERIAL PRIMARY KEY,
+        nama VARCHAR(255) NOT NULL,
+        url_foto VARCHAR(255) NOT NULL,
+        id_kelas INT,
+        CONSTRAINT fk_id_kelas FOREIGN KEY (id_kelas) REFERENCES Kelas (id_kelas)
+        
+    );
+    ALTER TABLE Siswa
+    ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+    ALTER TABLE Siswa
+    ADD COLUMN created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+    CREATE TABLE Penjemput (
+        id_penjemput SERIAL PRIMARY KEY,
+        id_user INT UNIQUE NOT NULL,
+        public_key TEXT,
+        id_siswa INT, 
+        CONSTRAINT fk_penjemput_user FOREIGN KEY(id_user) REFERENCES Users(id_user) ON DELETE CASCADE,
+        CONSTRAINT fk_penjemput_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa)
+    );
+
+    ALTER TABLE Penjemput
+    DROP COLUMN public_key;
+
+    CREATE TABLE Public_Key (
+    id_public_key SERIAL PRIMARY KEY,
+    id_penjemput INT NOT NULL, 
+    public_key TEXT NOT NULL,
+    device_id TEXT,
+    device_name TEXT,
+
+    CONSTRAINT fk_kunci_publik_penjemput 
+        FOREIGN KEY(id_penjemput) 
+        REFERENCES Penjemput(id_penjemput) 
+        ON DELETE CASCADE
+    );
+
+    CREATE TABLE Penjemputan (
+        id_penjemputan SERIAL PRIMARY KEY,
+        id_siswa INT NOT NULL,
+        id_penjemput INT NOT NULL,
+        status VARCHAR(100) NOT NULL,
+        tanggal_penjemputan TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT fk_penjemputan_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),
+        CONSTRAINT fk_penjemputan_penjemput FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput)
+    );
+
+    CREATE TYPE status_penjemputan_enum AS ENUM (
+            'menunggu penjemputan',
+            'sudah dekat',
+            'selesai',
+            'tidak dijemput'
+    );
+    CREATE TABLE Penjemputan (
+        id_penjemputan SERIAL PRIMARY KEY,
+
+        id_siswa INT NOT NULL,
+
+        id_penjemput INT NULL, 
+        status VARCHAR(100) NOT NULL,
+        tanggal DATE NOT NULL,
+        waktu_penjemputan_aktual TIMESTAMPTZ NULL,
+        CONSTRAINT fk_penjemputan_siswa 
+            FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),  
+        CONSTRAINT fk_penjemputan_penjemput 
+            FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput),
+        CONSTRAINT unique_siswa_per_hari UNIQUE (id_siswa, tanggal)
+    );
+
+    ALTER TABLE Penjemputan
+    ALTER COLUMN status TYPE status_penjemputan_enum
+    USING status::status_penjemputan_enum;
+    ALTER TABLE Penjemputan
+    ALTER COLUMN status SET DEFAULT 'menunggu penjemputan';
+
+    ALTER TABLE Penjemputan
+    ADD COLUMN waktu_status_sudah_dekat TIMESTAMPTZ NULL;
+
+ 

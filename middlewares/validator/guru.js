@@ -10,7 +10,7 @@ const createGuruRule = [
 ];
 export const createGuruValidator = (req, res, next) => {
   if (!req.file) {
-    throw new BadRequestError("profile_picture must be included");
+    throw new BadRequestError("Profile picture harus ada.");
   }
   validateObject(req.body, createGuruRule);
 

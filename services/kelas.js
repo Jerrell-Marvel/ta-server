@@ -2,58 +2,45 @@ import * as kelasRepo from "../repositories/kelas.js";
 import * as siswaRepo from "../repositories/siswa.js";
 import pool from "../db.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
+import { ConflictError } from "../errors/ConflictError.js";
 
 export const createKelas = async (kelasData) => {
   const { nomor_kelas, varian_kelas, id_guru, wali_kelas_id_guru, siswa } = kelasData;
+  const existingKelas = await kelasRepo.findActiveKelasByNomorAndVarian({ nomor_kelas, varian_kelas });
 
-  console.log("kldsjflsk", siswa);
+  console.log(existingKelas);
 
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const newKelasQueryResult = await kelasRepo.createKelas(
-      {
-        nomor_kelas,
-        varian_kelas,
-        id_guru,
-        wali_kelas_id_guru,
-      },
-      client
-    );
-    const newKelas = newKelasQueryResult.rows[0];
-    const newKelasId = newKelas.id_kelas;
-
-    for (const id_siswa of siswa) {
-      await siswaRepo.updateSiswa(id_siswa, { id_kelas: newKelasId }, client);
-    }
-
-    await client.query("COMMIT");
-
-    return newKelas;
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
+  if (existingKelas.rowCount !== 0) {
+    throw new ConflictError(`Kelas ${nomor_kelas}-${varian_kelas} sudah ada.`);
   }
+
+  const newKelasQueryResult = await kelasRepo.createKelas({
+    nomor_kelas,
+    varian_kelas,
+    id_guru,
+    wali_kelas_id_guru,
+  });
+
+  const newKelas = newKelasQueryResult.rows[0];
+
+  return newKelas;
 };
 
-export const updateKelas = async (idKelas, updateData) => {
+export const updateKelas = async (id_kelas, updateData) => {
   const { nomor_kelas, varian_kelas, wali_kelas_id_guru, tambah_siswa, remove_siswa } = updateData;
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
+    const updateKelasQueryResult = await kelasRepo.updateKelas(id_kelas, { nomor_kelas, varian_kelas, wali_kelas_id_guru }, client);
 
     if (updateKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+      throw new NotFoundError(`Kelas dengan ID ${id_kelas} tidak ditemukan.`);
     }
 
     for (const id_siswa of tambah_siswa) {
-      await siswaRepo.updateSiswa(id_siswa, { id_kelas: idKelas }, client);
+      await siswaRepo.updateSiswa(id_siswa, { id_kelas: id_kelas }, client);
     }
 
     for (const id_siswa of remove_siswa) {
@@ -61,26 +48,31 @@ export const updateKelas = async (idKelas, updateData) => {
     }
 
     await client.query("COMMIT");
-  } catch (error) {
+  } catch (err) {
     await client.query("ROLLBACK");
-    throw error;
+    // kepaksa, susah soalnya kalau enggak
+    if (err.code === "23505" && err.constraint === "idx_kelas_unique_active_class") {
+      throw new ConflictError("Kelas sudah ada sebelumnya.");
+    } else {
+      throw err;
+    }
   } finally {
     client.release();
   }
 };
 
-export const deleteKelas = async (idKelas, updateData) => {
+export const deleteKelas = async (id_kelas) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const updateKelasQueryResult = await kelasRepo.updateKelas(idKelas, { wali_kelas_id_guru: null }, client);
+    await kelasRepo.updateKelas(id_kelas, { wali_kelas_id_guru: null }, client);
+    const deleteKelasQueryResult = await kelasRepo.deleteKelas(id_kelas, client);
 
-    if (updateKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${idKelas} not found`);
+    if (deleteKelasQueryResult.rowCount === 0) {
+      throw new NotFoundError(`ID kelas ${id_kelas} tidak ditemukan.`);
     }
-
-    await siswaRepo.removeSiswasFromKelas(idKelas);
+    await siswaRepo.removeSiswasFromKelas(id_kelas, client);
 
     await client.query("COMMIT");
   } catch (error) {
@@ -91,16 +83,17 @@ export const deleteKelas = async (idKelas, updateData) => {
   }
 };
 
-export const getAllKelas = async ({ page, limit }) => {
+export const getAllKelas = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
-
+  const searchNumber = parseInt(search, 10);
   const kelasQueryResult = await kelasRepo.getAllKelas({
     limit,
     offset,
+    search: searchNumber,
   });
   const kelas = kelasQueryResult.rows;
 
-  const totalKelas = await kelasRepo.getTotalKelas();
+  const totalKelas = await kelasRepo.getTotalKelas({ search: searchNumber });
   const totalPages = Math.ceil(totalKelas / limit);
 
   return {
@@ -114,16 +107,17 @@ export const getAllKelas = async ({ page, limit }) => {
   };
 };
 
-export const getSingleKelas = async (idKelas) => {
-  const kelasQueryResult = await kelasRepo.getSingleKelas(idKelas);
+export const getSingleKelas = async (id_kelas) => {
+  const kelasQueryResult = await kelasRepo.getSingleKelas(id_kelas);
 
   if (kelasQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Kelas with id ${idKelas} not found`);
+    throw new NotFoundError(`ID kelas ${id_kelas} tidak ditemukan.`);
   }
 
-  const kelas = kelasQueryResult.rows;
+  const kelas = kelasQueryResult.rows[0];
 
-  console.log(kelas);
+  const siswaQueryResult = await siswaRepo.getSiswaInKelas(id_kelas);
+  const siswa = siswaQueryResult.rows;
 
-  return kelas;
+  return { ...kelas, siswa };
 };

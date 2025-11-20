@@ -1,17 +1,18 @@
 import * as userRepo from "../repositories/user.js";
-import * as penjempuRepo from "../repositories/penjemput.js";
+import * as penjemputRepo from "../repositories/penjemput.js";
 import { ConflictError, NotFoundError } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 import pool from "../db.js";
+import { hashPassword } from "../utils/hashPassword.js";
 
 export const createPenjemput = async (penjemputData) => {
   const { username, nama, url_foto, id_siswa } = penjemputData;
 
   const existingUser = await userRepo.getUserByUsername(username);
   if (existingUser.rowCount !== 0) {
-    throw new ConflictError("Username is already taken.");
+    throw new ConflictError("Username sudah diambil.");
   }
-
+  const hashedPassword = await hashPassword(username);
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -21,15 +22,14 @@ export const createPenjemput = async (penjemputData) => {
         username,
         nama,
         url_foto,
+        password: hashedPassword,
         role: "penjemput",
       },
       client
     );
     const newUser = newUserQueryResult.rows[0];
 
-    console.log(newUser);
-
-    const newPenjemputQueryResult = await penjempuRepo.createPenjemput(
+    const newPenjemputQueryResult = await penjemputRepo.createPenjemput(
       {
         id_user: newUser.id_user,
         id_siswa,
@@ -52,52 +52,37 @@ export const createPenjemput = async (penjemputData) => {
   }
 };
 
-export const updatePenjemput = async (idPenjemput, updateData) => {
-  const getPenjemputQueryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+export const updatePenjemput = async (id_penjemput, updateData) => {
+  const getPenjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
 
   if (getPenjemputQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Penjemput with ID ${idPenjemput} not found.`);
+    throw new NotFoundError(`ID penjemput ${id_penjemput} tidak ditemukan.`);
   }
 
-  const { username, nama, url_foto, id_siswa } = updateData;
+  const { username, nama, url_foto } = updateData;
 
+  if (username) {
+    const existingUserQueryResult = await userRepo.getUserByUsername(username);
+    if (existingUserQueryResult.rowCount !== 0) {
+      throw new ConflictError("Username sudah diambil.");
+    }
+  }
   const penjemput = getPenjemputQueryResult.rows[0];
   const idUser = penjemput.id_user;
+  const updateUserQueryResult = await userRepo.updateUser(idUser, {
+    username,
+    nama,
+    url_foto,
+  });
+  const updatedUser = updateUserQueryResult.rows[0];
 
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    await userRepo.updateUser(
-      idUser,
-      {
-        username,
-        nama,
-        url_foto,
-      },
-      client
-    );
-
-    await penjempuRepo.updatePenjemput(
-      idPenjemput,
-      {
-        id_siswa,
-      },
-      client
-    );
-
-    await client.query("COMMIT");
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+  return updatedUser;
 };
 
-export const deletePenjemput = async (idPenjemput) => {
-  const queryResult = await penjempuRepo.getPenjemputByIdPenjemput(idPenjemput);
+export const deletePenjemput = async (id_penjemput) => {
+  const queryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${idPenjemput} not found.`);
+    throw new NotFoundError(`ID penjemput ${id_penjemput} tidak ditemukan.`);
   }
 
   const idUser = queryResult.rows[0].id_user;
@@ -106,16 +91,17 @@ export const deletePenjemput = async (idPenjemput) => {
   return;
 };
 
-export const getAllPenjemputs = async ({ page, limit }) => {
+export const getAllPenjemputs = async ({ page, limit, search }) => {
   const offset = (page - 1) * limit;
 
-  const penjemputsQueryResult = await penjempuRepo.getAllPenjemputs({
+  const penjemputsQueryResult = await penjemputRepo.getAllPenjemputs({
     limit,
     offset,
+    search,
   });
   const penjemputs = penjemputsQueryResult.rows;
 
-  const totalPenjemputs = await penjempuRepo.getTotalPenjemputs();
+  const totalPenjemputs = await penjemputRepo.getTotalPenjemputs({ search });
   const totalPages = Math.ceil(totalPenjemputs / limit);
 
   return {
@@ -127,4 +113,16 @@ export const getAllPenjemputs = async ({ page, limit }) => {
       limit,
     },
   };
+};
+
+export const getPenjemputProfile = async (id_penjemput) => {
+  const { rows } = await penjemputRepo.getPenjemputProfileById(id_penjemput);
+
+  return rows[0];
+};
+
+export const addPublicKey = async (id_penjemput, { public_key, device_id, device_name }) => {
+  const { rows } = await penjemputRepo.insertPublicKey({ id_penjemput, public_key, device_id, device_name });
+
+  return rows[0];
 };

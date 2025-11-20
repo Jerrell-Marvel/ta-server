@@ -1,0 +1,153 @@
+create guru ->
+"data": {
+        "id_user": 67,
+        "username": "guru24",
+        "role": "guru",
+        "url_foto": "http://localhost:5000/profile_picture-1760243664854-148472524.png",
+        "nama": "guru 23",
+        "id_guru": 35,
+        "nomor_telepon": "08123123123"
+    }
+
+
+get guru ->
+data : {
+    id_user,
+    username,
+    url_foto,
+    role,
+    nama,
+    id_guru,
+    nomor_telepon,
+    id_kelas,
+    nomor_kelas,
+    varian_kelas,
+}
+
+update guru ->
+data : {
+    id_user,
+    username,
+    url_foto,
+    role,
+    nama,
+    id_guru,
+    nomor_telepon
+}
+
+delete guru ->
+{success:true}
+
+create, update siswa -> 
+data : {
+    "id_siswa": 25,
+    "nama": "siswa5",
+    "id_kelas": null,
+    "url_foto": "http://localhost:5000/profile_picture-1760197290624-654926186.png",
+    "is_active": true
+}
+
+get all siswa -> 
+{
+ "id_siswa": 15,
+            "nama": "siswa 1 upd",
+            "url_foto": "localhost:5000/profile_picture-1759786293070-321031364.png",
+            "id_kelas": 19,
+            "nomor_kelas": 1,
+            "varian_kelas": "c",
+            "wali_kelas_id_guru": 17
+}
+
+{
+    
+}
+
+create penjemput -> {
+     "data": {
+        "id_user": 66,
+        "username": "penjemput200",
+        "role": "penjemput",
+        "url_foto": "http://localhost:5000/profile_picture-1760243588235-755292674.png",
+        "nama": "dodol111",
+        "id_penjemput": 12,
+        "id_siswa": 12
+    }
+}
+
+get penjemput -> {
+     {
+            "id_penjemput": 8,
+            "id_user": 60,
+            "username": "penjemput1",
+            "nama": "penjemput 1",
+            "url_foto": "localhost:5000/profile_picture-1759785049232-637023829.png",
+            "id_siswa": 15,
+            "nama_siswa": "siswa 1 upd",
+            "nomor_kelas": 1,
+            "varian_kelas": "c"
+        }
+}
+
+updatePenjemput -> {
+    "id_user": 66,
+        "username": "penjemput200",
+        "nama": "dodols",
+        "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png",
+        "role": "penjemput"
+}
+
+getSingleSiswa -> {
+    {
+        "id_kelas": 10,
+        "nomor_kelas": 10,
+        "varian_kelas": "i",
+        "nama_wali_kelas": null,
+        "url_foto_wali_kelas": null,
+        "siswa": [
+            {
+                "id_siswa": 21,
+                "nama": "siswa1111",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 22,
+                "nama": "siswagg",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 24,
+                "nama": "siswaUpdated",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 23,
+                "nama": "siswa12234",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 25,
+                "nama": "siswa5",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 18,
+                "nama": "siswa300",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 19,
+                "nama": "siswa400",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            },
+            {
+                "id_siswa": 20,
+                "nama": "siswa500",
+                "url_foto": "http://localhost:5000/profile_picture-1760271151644-227349725.png"
+            }
+        ]
+    }
+}
+
+
+logout, notificationioner
+update status ga balek

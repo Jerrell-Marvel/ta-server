@@ -8,12 +8,12 @@ import { createkelas, updateKelas, deleteKelas, getAllKelas, getSingleKelas } fr
 
 const router = express.Router();
 
-router.use(authMiddleware(["admin"]));
-router.post("/", createKelasValidator, createkelas);
+// router.use(authMiddleware(["admin"]));
+router.post("/", authMiddleware(["admin"]), createKelasValidator, createkelas);
 // router.post("/", fileUpload("./public").single("profile_picture"), createGuruValidator, createGuru);
-router.get("/", getAllKelas);
-router.get("/:id_kelas", getSingleKelas);
-router.patch("/:id_kelas", updateKelas);
-router.delete("/:id_kelas", deleteKelas);
+router.get("/", authMiddleware(["admin"]), getAllKelas);
+router.get("/:id_kelas", authMiddleware(["admin"]), getSingleKelas);
+router.patch("/:id_kelas", authMiddleware(["admin"]), updateKelas);
+router.delete("/:id_kelas", authMiddleware(["admin"]), deleteKelas);
 
 export default router;

@@ -10,3 +10,17 @@ export const loginValidator = (req, res, next) => {
 
   next();
 };
+
+const changePasswordRule = [{ field: "password", displayName: "password" }];
+export const changePasswordValidator = (req, res, next) => {
+  validateObject(req.body, changePasswordRule);
+
+  next();
+};
+
+const logoutRule = [{ field: "device_id", displayName: "device ID" }];
+
+export const logoutValidator = (req, res, next) => {
+  validateObject(logoutRule);
+  next();
+};
