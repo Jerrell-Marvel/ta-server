@@ -14,3 +14,11 @@ export const changePassword = async (req, res) => {
   await authService.changePassword(id_user, req.body.password);
   return res.json({ success: true });
 };
+
+export const logout = async (req, res) => {
+  const { id_guru } = req.user;
+  const { device_id } = req.body;
+  await authService.logout(id_guru, device_id);
+
+  return res.json({ success: true });
+};

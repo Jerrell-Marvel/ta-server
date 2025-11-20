@@ -41,15 +41,16 @@ export const getNotificationTokenByDeviceId = async (device_id) => {
   return result;
 };
 
-export const updateNotificationTokenById = async (id_notification_token, { id_guru }) => {
+export const updateNotificationTokenById = async (id_notification_token, { id_guru, notification_token }) => {
   const query = `
         UPDATE Notification_Token
-        SET id_guru = $1
-        WHERE id_notification_token = $2
+        SET id_guru = $1,
+        notification_token = $2
+        WHERE id_notification_token = $3
         RETURNING *;
     `;
 
-  const values = [id_guru, id_notification_token];
+  const values = [id_guru, notification_token, id_notification_token];
 
   const result = await pool.query(query, values);
   return result;
@@ -71,4 +72,15 @@ export const insertNotificationToken = async ({ id_guru, device_id, device_name,
 
   const result = await pool.query(query, values);
   return result;
+};
+
+export const deleteNotificationToken = async (id_guru, device_id) => {
+  const query = `
+    DELETE FROM notification_token
+    WHERE id_guru = $1 AND device_id = $2
+    RETURNING *;
+  `;
+  const deleteResult = await pool.query(query, [id_guru, device_id]);
+
+  return deleteResult;
 };

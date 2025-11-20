@@ -10,7 +10,7 @@ export const createPenjemput = async (penjemputData) => {
 
   const existingUser = await userRepo.getUserByUsername(username);
   if (existingUser.rowCount !== 0) {
-    throw new ConflictError("Username is already taken.");
+    throw new ConflictError("Username sudah diambil.");
   }
   const hashedPassword = await hashPassword(username);
   const client = await pool.connect();
@@ -56,7 +56,7 @@ export const updatePenjemput = async (id_penjemput, updateData) => {
   const getPenjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
 
   if (getPenjemputQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Penjemput with ID ${id_penjemput} not found.`);
+    throw new NotFoundError(`ID penjemput ${id_penjemput} tidak ditemukan.`);
   }
 
   const { username, nama, url_foto } = updateData;
@@ -64,7 +64,7 @@ export const updatePenjemput = async (id_penjemput, updateData) => {
   if (username) {
     const existingUserQueryResult = await userRepo.getUserByUsername(username);
     if (existingUserQueryResult.rowCount !== 0) {
-      throw new ConflictError("Username is already taken.");
+      throw new ConflictError("Username sudah diambil.");
     }
   }
   const penjemput = getPenjemputQueryResult.rows[0];
@@ -79,10 +79,10 @@ export const updatePenjemput = async (id_penjemput, updateData) => {
   return updatedUser;
 };
 
-export const deletePenjemput = async (idPenjemput) => {
-  const queryResult = await penjemputRepo.getPenjemputByIdPenjemput(idPenjemput);
+export const deletePenjemput = async (id_penjemput) => {
+  const queryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`Guru with ID ${idPenjemput} not found.`);
+    throw new NotFoundError(`ID penjemput ${id_penjemput} tidak ditemukan.`);
   }
 
   const idUser = queryResult.rows[0].id_user;

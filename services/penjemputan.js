@@ -1,6 +1,7 @@
 import * as penjemputanRepo from "../repositories/penjemputan.js";
 import * as kelasRepo from "../repositories/kelas.js";
 import { BadRequestError } from "../errors/BadRequestError.js";
+import { ConflictError } from "../errors/ConflictError.js";
 import * as penjemputRepo from "../repositories/penjemput.js";
 import crypto from "crypto";
 import { NotFoundError } from "../errors/NotFoundError.js";
@@ -18,7 +19,7 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
 
   const expTimestamp = exp * 1000;
   if (Date.now() > expTimestamp) {
-    throw new BadRequestError("QR code sudah kadaluwarsa");
+    throw new BadRequestError("QR code sudah kadaluwarsa.");
   }
 
   console.log("idm", id_penjemput);
@@ -32,7 +33,7 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   const publicKeyQueryResult = await penjemputRepo.getPublicKeyByDeviceAndPenjemput(device_id, id_penjemput);
 
   if (publicKeyQueryResult.rowCount === 0) {
-    throw new BadRequestError("Gagal verifikasi QR, key berbeda.");
+    throw new BadRequestError("Gagal verifikasi QR, key tidak ditemukan.");
   }
 
   const publicKey = publicKeyQueryResult.rows[0].public_key;
@@ -47,10 +48,14 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   const isSignatureValid = verify.verify(publicKey, signature, "base64");
 
   if (!isSignatureValid) {
-    throw new BadRequestError("Invalid signature");
+    throw new BadRequestError("Signature tidak valid.");
   }
 
-  await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
+  const completePenjemputanQueryResult = await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
+
+  if (completePenjemputanQueryResult.rowCount === 0) {
+    throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
+  }
 };
 
 export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {
@@ -60,18 +65,17 @@ export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {
     total_antrian_sudah_dekat: parseInt(queryCountResult.rows[0].count, 10),
   };
 
+  response.nomor_antrian = null;
   if (role === "penjemput") {
     const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
     if (penjemputQueryResult.rowCount === 0) {
-      throw new NotFoundError("penjemput tidak ada");
+      throw new NotFoundError("Penjemput tidak ditemukan.");
     }
     const penjemput = penjemputQueryResult.rows[0];
     const nomorAntrianQueryResult = await penjemputanRepo.getNomorAntrianPenjemput(penjemput.id_siswa);
 
     if (nomorAntrianQueryResult.rowCount !== 0) {
       response.nomor_antrian = parseInt(nomorAntrianQueryResult.rows[0].nomor_antrian, 10);
-    } else {
-      response.nomor_antrian = null;
     }
   }
 
@@ -83,13 +87,13 @@ export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {
 export const getDetailPenjemputanHariIni = async (id_penjemput) => {
   const penjemputQueryResult = await penjemputRepo.getPenjemputByIdPenjemput(id_penjemput);
   if (penjemputQueryResult.rowCount === 0) {
-    throw new NotFoundError("Invalid penjemput");
+    throw new NotFoundError("Penjemput tidak valid.");
   }
   const penjemput = penjemputQueryResult.rows[0];
   const detailPenjemputanQueryResult = await penjemputanRepo.findPenjemputanHariIniByIdSiswa(penjemput.id_siswa);
 
   if (detailPenjemputanQueryResult.rowCount === 0) {
-    throw new NotFoundError("Tidak ada penjemputan");
+    throw new NotFoundError("Tidak ada penjemputan.");
   }
 
   return {

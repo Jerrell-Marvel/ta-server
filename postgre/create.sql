@@ -38,10 +38,10 @@
     );
     -- ALTER TABLE NotificationToken ADD COLUMN devide_id VARCHAR(100) NOT NULL;
 
-    ALTER TABLE NotificationToken
-    DROP CONSTRAINT fk_tokens_user;
-    ALTER TABLE NotificationToken
-    RENAME COLUMN id_user TO id_guru;
+    -- ALTER TABLE NotificationToken
+    -- DROP CONSTRAINT fk_tokens_user;
+    -- ALTER TABLE NotificationToken
+    -- RENAME COLUMN id_user TO id_guru;
     ALTER TABLE NotificationToken
     ADD CONSTRAINT fk_tokens_guru FOREIGN KEY (id_guru)
         REFERENCES Guru(id_guru) ON DELETE CASCADE;
@@ -155,8 +155,4 @@
     ALTER TABLE Penjemputan
     ADD COLUMN waktu_status_sudah_dekat TIMESTAMPTZ NULL;
 
-    INSERT INTO Penjemputan (id_siswa, status, tanggal)
-    SELECT id_siswa, 'menunggu penjemputan', CURRENT_DATE
-    FROM Siswa
-    WHERE is_active = TRUE
-    ON CONFLICT (id_siswa, tanggal) DO NOTHING; 
+ 

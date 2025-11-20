@@ -7,7 +7,7 @@ const createKelasRule = [
 ];
 export const createKelasValidator = (req, res, next) => {
   if (req.siswa && Array.isArray(req.siswa)) {
-    throw new BadRequestError("peserta siswa must be an array");
+    throw new BadRequestError("Peserta siswa harus array.");
   }
   validateObject(req.body, createKelasRule);
 

@@ -95,6 +95,7 @@ export async function completePenjemputan(id_siswa, id_penjemput) {
      waktu_status_sudah_dekat = NULL
     WHERE 
      id_siswa = $1 AND tanggal = CURRENT_DATE
+     AND status != 'selesai'
     RETURNING *;
    `;
 

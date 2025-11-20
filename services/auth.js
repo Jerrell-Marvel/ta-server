@@ -54,7 +54,7 @@ export const login = async ({ username, password, device_id, device_name, notifi
       } else if (notificationToken.id_guru !== guru.id_guru) {
         // artinya pas ke logout, dia login id_guru lain
         // maka update
-        await notificationRepo.updateNotificationTokenById(notificationToken.id_notification_token, { id_guru: guru.id_guru });
+        await notificationRepo.updateNotificationTokenById(notificationToken.id_notification_token, { id_guru: guru.id_guru, notification_token });
       }
     }
   } else if (user.role === "penjemput") {
@@ -79,4 +79,8 @@ export const changePassword = async (id_user, newPassword) => {
   const hashedPassword = await hashPassword(newPassword);
 
   const result = await userRepo.updateUser(id_user, { password: hashedPassword });
+};
+
+export const logout = async (id_guru, device_id) => {
+  await notificationRepo.deleteNotificationToken(id_guru, device_id);
 };

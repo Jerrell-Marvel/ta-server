@@ -8,7 +8,7 @@ const createPenjemputRule = [
 ];
 export const createPenjemputValidator = (req, res, next) => {
   if (!req.file) {
-    throw new BadRequestError("profile_picture must be included");
+    throw new BadRequestError("Profile picture harus ada.");
   }
   validateObject(req.body, createPenjemputRule);
 

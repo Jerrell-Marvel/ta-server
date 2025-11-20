@@ -70,7 +70,7 @@ export const deleteKelas = async (id_kelas) => {
     const deleteKelasQueryResult = await kelasRepo.deleteKelas(id_kelas, client);
 
     if (deleteKelasQueryResult.rowCount === 0) {
-      throw new NotFoundError(`id kelas with ID ${id_kelas} not found`);
+      throw new NotFoundError(`ID kelas ${id_kelas} tidak ditemukan.`);
     }
     await siswaRepo.removeSiswasFromKelas(id_kelas, client);
 
@@ -111,7 +111,7 @@ export const getSingleKelas = async (id_kelas) => {
   const kelasQueryResult = await kelasRepo.getSingleKelas(id_kelas);
 
   if (kelasQueryResult.rowCount === 0) {
-    throw new NotFoundError(`Kelas with id ${id_kelas} not found`);
+    throw new NotFoundError(`ID kelas ${id_kelas} tidak ditemukan.`);
   }
 
   const kelas = kelasQueryResult.rows[0];

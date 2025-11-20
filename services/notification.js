@@ -6,7 +6,7 @@ export const registerToken = async (id_guru, token, deviceName) => {
   const result = await notificationRepo.createOrUpdateToken(id_guru, token, deviceName);
 
   if (result.rowCount === 0) {
-    throw new BadRequestError("Gagal menyimpan token notifikasi");
+    throw new BadRequestError("Gagal menyimpan token notifikasi.");
   }
   return result.rows[0];
 };

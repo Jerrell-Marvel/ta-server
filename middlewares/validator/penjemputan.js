@@ -6,7 +6,7 @@ export const updateStatusPenjemputanValidator = (req, res, next) => {
 
   const { status } = req.body;
   if (status !== "sudah dekat" && status !== "menunggu penjemputan") {
-    throw new BadRequestError("Invalid status update");
+    throw new BadRequestError("Invalid status.");
   }
 
   next();

@@ -11,7 +11,7 @@ export const updateSiswa = async (idSiswa, siswaData) => {
   const queryResult = await siswaRepo.updateSiswa(idSiswa, siswaData);
 
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`siswa with ID ${idSiswa} not found.`);
+    throw new NotFoundError(`ID siswa ${idSiswa} tidak ditemukan.`);
   }
 
   return queryResult.rows[0];
@@ -21,7 +21,7 @@ export const deleteSiswa = async (idSiswa) => {
   const queryResult = await siswaRepo.deleteSiswa(idSiswa);
 
   if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`siswa with ID ${idSiswa} not found.`);
+    throw new NotFoundError(`ID siswa ${idSiswa} tidak ditemukan.`);
   }
 
   return queryResult.rows[0];
@@ -69,7 +69,7 @@ export const getAllSiswas = async ({ page, limit, assigned, search }) => {
 export const getSingleSiswa = async (id_siswa) => {
   const siswaQueryResult = await siswaRepo.getSingleSiswa({ id_siswa });
   if (siswaQueryResult.rowCount === 0) {
-    throw new NotFoundError(`siswa with id ${id_siswa} not found`);
+    throw new NotFoundError(`ID siswa ${id_siswa} tidak ditemukan.`);
   }
   const siswa = siswaQueryResult.rows[0];
 
