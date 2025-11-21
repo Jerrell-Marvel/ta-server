@@ -104,7 +104,7 @@ export async function completePenjemputan(id_siswa, id_penjemput) {
   return result;
 }
 
-export async function updateStatusByIdSiswa(id_siswa, status) {
+export async function updateStatusByIdSiswa(id_siswa, status, client) {
   const query = `
     UPDATE Penjemputan
     SET 
@@ -115,12 +115,13 @@ export async function updateStatusByIdSiswa(id_siswa, status) {
         ELSE waktu_status_sudah_dekat
       END
     WHERE 
-      id_siswa = $1 AND tanggal = CURRENT_DATE
+      id_siswa = $1 AND tanggal = CURRENT_DATE AND status != $2
     RETURNING *;
   `;
 
   const values = [id_siswa, status];
-  const result = await pool.query(query, values);
+  const executor = client ?? pool;
+  const result = await executor.query(query, values);
   return result;
 }
 
@@ -173,4 +174,42 @@ export const findPenjemputanHariIniByIdSiswa = async (id_siswa) => {
 
   const result = await pool.query(query, [id_siswa]);
   return result;
+};
+
+export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_aktual, id_penjemput, status }, client) => {
+  let setClauses = [];
+  let values = [];
+  let paramIndex = 1;
+
+  if (waktu_penjemputan_aktual) {
+    setClauses.push(`waktu_penjemputan_aktual = $${paramIndex++}`);
+    values.push(waktu_penjemputan_aktual);
+  }
+
+  if (id_penjemput) {
+    setClauses.push(`id_penjemput = $${paramIndex++}`);
+    values.push(id_penjemput);
+  }
+
+  if (status) {
+    setClauses.push(`status = $${paramIndex++}`);
+    values.push(status);
+  }
+
+  const setQuery = setClauses.join(", ");
+
+  values.push(idSiswa);
+  const whereParamIndex = paramIndex;
+
+  const query = `
+      UPDATE "Penjemputan"
+      SET ${setQuery}
+      WHERE id_siswa = $${whereParamIndex} AND tanggal_penjemputan = CURRENT_DATE
+      RETURNING *;
+  `;
+
+  const executor = client ?? pool;
+  const result = await executor.query(query, values);
+
+  return result.rows;
 };

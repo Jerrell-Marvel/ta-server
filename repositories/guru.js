@@ -244,7 +244,7 @@ export const getAllNotWaliKelas = async ({ limit, offset, search }) => {
   return result;
 };
 
-export async function getWaliKelasDetailsByIdSiswa(id_siswa) {
+export async function getWaliKelasByIdSiswa(id_siswa) {
   const query = `
     SELECT
       k.wali_kelas_id_guru,

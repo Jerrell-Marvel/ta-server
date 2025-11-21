@@ -52,11 +52,21 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
     throw new BadRequestError("Signature tidak valid.");
   }
 
-  const completePenjemputanQueryResult = await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
-
-  if (completePenjemputanQueryResult.rowCount === 0) {
-    throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const updateStatusQueryResult = await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, "selesai");
+    if (updateStatusQueryResult.rowCount === 0) {
+      throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
+    }
+    const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
+  // const completePenjemputanQueryResult = await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
 };
 
 export const getInfoAntrian = async ({ id_user, id_penjemput, role }) => {
@@ -116,9 +126,9 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 
   if (status === "sudah dekat") {
-    const siswaDetailsResult = await guruRepo.getWaliKelasDetailsByIdSiswa(penjemput.id_siswa);
+    const siswaDetailsResult = await guruRepo.getWaliKelasByIdSiswa(penjemput.id_siswa);
 
-    if (siswaDetailsResult.rowCount > 0) {
+    if (siswaDetailsResult.rowCount !== 0) {
       const { wali_kelas_id_guru, nama_siswa } = siswaDetailsResult.rows[0];
 
       const tokensResult = await notificationRepo.getNotificationTokensByIdGuru(wali_kelas_id_guru);
