@@ -55,6 +55,7 @@ import siswaRoute from "./routes/siswa.js";
 import penjemputRoute from "./routes/penjemput.js";
 import kelasRoute from "./routes/kelas.js";
 import penjemputanRoute from "./routes/penjemputan.js";
+import pool from "./db.js";
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
@@ -72,10 +73,13 @@ app.use(errorHandler);
 // Run  server
 const PORT = 5000;
 const HOST = "0.0.0.0";
-app.listen(PORT, HOST, () => {
+app.listen(PORT, HOST, async () => {
   try {
+    const res = await pool.query("SELECT 5+5;");
+    console.log("connected to server", res.rows);
     console.log(`Server is running on port ${PORT}`);
   } catch (err) {
+    console.log(err);
     console.log("Failed");
   }
 });

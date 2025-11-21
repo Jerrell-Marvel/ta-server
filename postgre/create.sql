@@ -42,9 +42,9 @@
     -- DROP CONSTRAINT fk_tokens_user;
     -- ALTER TABLE NotificationToken
     -- RENAME COLUMN id_user TO id_guru;
-    ALTER TABLE NotificationToken
-    ADD CONSTRAINT fk_tokens_guru FOREIGN KEY (id_guru)
-        REFERENCES Guru(id_guru) ON DELETE CASCADE;
+    -- ALTER TABLE NotificationToken
+    -- ADD CONSTRAINT fk_tokens_guru FOREIGN KEY (id_guru)
+    --     REFERENCES Guru(id_guru) ON DELETE CASCADE;
 
 
     CREATE TABLE Kelas (
@@ -114,15 +114,15 @@
         ON DELETE CASCADE
     );
 
-    CREATE TABLE Penjemputan (
-        id_penjemputan SERIAL PRIMARY KEY,
-        id_siswa INT NOT NULL,
-        id_penjemput INT NOT NULL,
-        status VARCHAR(100) NOT NULL,
-        tanggal_penjemputan TIMESTAMPTZ DEFAULT NOW(),
-        CONSTRAINT fk_penjemputan_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),
-        CONSTRAINT fk_penjemputan_penjemput FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput)
-    );
+    -- CREATE TABLE Penjemputan (
+    --     id_penjemputan SERIAL PRIMARY KEY,
+    --     id_siswa INT NOT NULL,
+    --     id_penjemput INT NOT NULL,
+    --     status VARCHAR(100) NOT NULL,
+    --     tanggal_penjemputan TIMESTAMPTZ DEFAULT NOW(),
+    --     CONSTRAINT fk_penjemputan_siswa FOREIGN KEY (id_siswa) REFERENCES Siswa (id_siswa),
+    --     CONSTRAINT fk_penjemputan_penjemput FOREIGN KEY (id_penjemput) REFERENCES Penjemput (id_penjemput)
+    -- );
 
     CREATE TYPE status_penjemputan_enum AS ENUM (
             'menunggu penjemputan',
