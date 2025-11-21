@@ -73,6 +73,13 @@ app.use(errorHandler);
 // Run  server
 const PORT = 5000;
 const HOST = "0.0.0.0";
+
+app.get("test-only", async (req, res) => {
+  const result = await pool.query("SELECT * FROM users");
+
+  console.log("success", result.rows);
+  return res.json({ success: true, data: result.rows });
+});
 app.listen(PORT, HOST, async () => {
   try {
     const res = await pool.query("SELECT 5+5;");
