@@ -56,6 +56,13 @@ import penjemputRoute from "./routes/penjemput.js";
 import kelasRoute from "./routes/kelas.js";
 import penjemputanRoute from "./routes/penjemputan.js";
 import pool from "./db.js";
+
+app.get("/test-only", async (req, res) => {
+  const result = await pool.query("SELECT * FROM users");
+
+  console.log("success", result.rows);
+  return res.json({ success: true, data: result.rows });
+});
 // routes
 const api = express.Router();
 api.use("/auth", authRoute);
@@ -74,12 +81,6 @@ app.use(errorHandler);
 const PORT = 5000;
 const HOST = "0.0.0.0";
 
-app.get("test-only", async (req, res) => {
-  const result = await pool.query("SELECT * FROM users");
-
-  console.log("success", result.rows);
-  return res.json({ success: true, data: result.rows });
-});
 app.listen(PORT, HOST, async () => {
   try {
     const res = await pool.query("SELECT 5+5;");
