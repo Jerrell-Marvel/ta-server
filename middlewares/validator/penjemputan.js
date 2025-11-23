@@ -1,4 +1,5 @@
 import { BadRequestError } from "../../errors/BadRequestError.js";
+import { validateObject } from "../../utils/validateObject.js";
 
 const updateStatusPenjemputRule = [{ field: "status", displayName: "status" }];
 export const updateStatusPenjemputanValidator = (req, res, next) => {
