@@ -56,11 +56,11 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const updateStatusQueryResult = await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, "selesai");
+    const updateStatusQueryResult = await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, "selesai", client);
     if (updateStatusQueryResult.rowCount === 0) {
       throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
     }
-    const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput });
+    const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput }, client);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
