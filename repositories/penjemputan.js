@@ -204,7 +204,7 @@ export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_ak
   const query = `
       UPDATE Penjemputan
       SET ${setQuery}
-      WHERE id_siswa = $${whereParamIndex} AND tanggal_penjemputan = CURRENT_DATE
+      WHERE id_siswa = $${whereParamIndex} AND tanggal = CURRENT_DATE
       RETURNING *;
   `;
 
