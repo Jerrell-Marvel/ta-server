@@ -189,6 +189,7 @@ export const getGuruProfile = async (id_guru) => {
     ...profileQueryResult.rows[0],
   };
 
+  profileGuru.is_wali_kelas = false;
   if (kelasQueryResult.rowCount !== 0) {
     profileGuru.is_wali_kelas = true;
     profileGuru = {
