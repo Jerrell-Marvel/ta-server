@@ -1,3 +1,4 @@
+import { UnprocessableEntityError } from "../errors/UnprocessableEntityError.js";
 import * as penjemputanService from "../services/penjemputan.js";
 
 export const getAllPenjemputanHariIni = async (req, res) => {
@@ -54,6 +55,8 @@ export const updateStatusPenjemputan = async (req, res) => {
   const { id_penjemput } = req.user;
 
   const result = await penjemputanService.updateStatusPenjemputan(id_penjemput, status);
+
+  throw new UnprocessableEntityError("MOOOOONER");
 
   res.status(200).json({
     success: true,
