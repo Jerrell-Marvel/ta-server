@@ -153,7 +153,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
           sound: "default",
           title: "Siswa Akan Dijemput",
           body: `${nama_siswa} akan segera dijemput. Penjemput sudah dekat.`,
-          data: { id_siswa: id_siswa, status: status },
+          data: { status: status },
         };
 
         sendPushNotification(message).catch((error) => {
