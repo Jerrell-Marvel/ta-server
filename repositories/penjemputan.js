@@ -115,7 +115,7 @@ export async function updateStatusByIdSiswa(id_siswa, status, client) {
         ELSE waktu_status_sudah_dekat
       END
     WHERE 
-      id_siswa = $1 AND tanggal = CURRENT_DATE AND status != $2
+      id_siswa = $1 AND tanggal = CURRENT_DATE AND status != $2::status_penjemputan_enum
     RETURNING *;
   `;
 
