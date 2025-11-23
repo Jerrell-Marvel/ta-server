@@ -1,41 +1,57 @@
 import { Expo } from "expo-server-sdk";
+
 const expo = new Expo();
 
-export const sendPushNotification = async ({ to, title, body, sound = "default", data }) => {
-  let messages = [];
+export const sendPushNotification = async ({ to, title, body, sound = "default", data = {} }) => {
+  // 1. Filter for valid tokens only
+  const validTokens = to.filter((t) => Expo.isExpoPushToken(t));
 
-  for (let pushToken of to) {
-    if (!Expo.isExpoPushToken(pushToken)) {
-      console.error(`invalid token ${pushToken}`);
-      continue;
-    }
-
-    messages.push({
-      to: pushToken,
-      sound: sound,
-      title: title,
-      body: body,
-      data: data,
-    });
+  if (validTokens.length === 0) {
+    console.error("❌ Error: No valid Expo push tokens provided.");
+    return;
   }
+
+  // 2. Construct the messages
+  const messages = validTokens.map((pushToken) => ({
+    to: pushToken,
+    sound: sound,
+    title: title,
+    body: body,
+    // FIX: Ensure data is always an Object to prevent the error
+    data: typeof data === "object" ? data : { message: data },
+  }));
+
+  // 3. Send the chunks to Expo
+  let tickets = [];
+  let chunks = expo.chunkPushNotifications(messages);
 
   try {
-    const tickets = await expo.sendPushNotificationsAsync(messages);
-    console.log("Tiket notifikasi diterima:", tickets);
-
-    // tickets.forEach((ticket) => {
-    //   if (ticket.status === "error") {
-    //     console.error(`Error saat mengirim ke token: ${ticket.message}`);
-    //     if (ticket.details && ticket.details.error) {
-    //       if (ticket.details.error === "DeviceNotRegistered") {
-    //         console.warn(`Token ${ticket.to} tidak terdaftar. Hapus dari DB.`);
-    //       }
-    //     }
-    //   }
-    // });
-
-    return tickets;
+    for (let chunk of chunks) {
+      try {
+        let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        console.log("✅ Tickets received (Sent to Expo):", ticketChunk);
+        tickets.push(...ticketChunk);
+      } catch (error) {
+        console.error("❌ Error sending chunk", error);
+      }
+    }
   } catch (error) {
-    console.error("Error notif", error);
+    console.error("❌ Critical Error", error);
   }
+
+  return tickets;
 };
+
+// --- TEST RUNNER ---
+// (async () => {
+//   try {
+//     await sendPushNotification({
+//       to: ["ExponentPushToken[1hlItACxv5axNvkwFA2fWQ]"],
+//       title: "Test Title",
+//       body: "Test Body",
+//       data: "This string will be auto-fixed", // This will now work safely
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// })();

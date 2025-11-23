@@ -39,11 +39,11 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
 
   const publicKey = publicKeyQueryResult.rows[0].public_key;
 
-  const payloadString = JSON.stringify(qrCodeData.data);
+  const payload = JSON.parse(qrCodeData.data);
 
   const verify = crypto.createVerify("SHA1");
 
-  verify.update(payloadString);
+  verify.update(qrCodeData.data);
   verify.end();
 
   const isSignatureValid = verify.verify(publicKey, signature, "base64");
