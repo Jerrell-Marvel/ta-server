@@ -53,20 +53,20 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
     throw new BadRequestError("Signature tidak valid.");
   }
 
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const updateStatusQueryResult = await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, "selesai");
-    if (updateStatusQueryResult.rowCount === 0) {
-      throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
-    }
-    const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput });
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+  // const client = await pool.connect();
+  // try {
+  //   await client.query("BEGIN");
+  //   const updateStatusQueryResult = await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, "selesai");
+  //   if (updateStatusQueryResult.rowCount === 0) {
+  //     throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
+  //   }
+  //   const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput });
+  // } catch (error) {
+  //   await client.query("ROLLBACK");
+  //   throw error;
+  // } finally {
+  //   client.release();
+  // }
   // const completePenjemputanQueryResult = await penjemputanRepo.completePenjemputan(penjemput.id_siswa, id_penjemput);
 };
 
