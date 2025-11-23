@@ -43,15 +43,15 @@ export const sendPushNotification = async ({ to, title, body, sound = "default",
 };
 
 // --- TEST RUNNER ---
-// (async () => {
-//   try {
-//     await sendPushNotification({
-//       to: ["ExponentPushToken[1hlItACxv5axNvkwFA2fWQ]"],
-//       title: "Test Title",
-//       body: "Test Body",
-//       data: "This string will be auto-fixed", // This will now work safely
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
+(async () => {
+  try {
+    await sendPushNotification({
+      to: ["ExponentPushToken[7lToBlISRi4TR9-YlsxXWj]"],
+      title: "Test Title",
+      body: "Test Body",
+      data: "This string will be auto-fixed", // This will now work safely
+    });
+  } catch (err) {
+    console.log(err);
+  }
+})();
