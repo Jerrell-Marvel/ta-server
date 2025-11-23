@@ -134,6 +134,8 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   if (status === "sudah dekat") {
     const siswaDetailsResult = await siswaRepo.getSingleSiswa(penjemput.id_siswa);
 
+    console.log("siswa details result", siswaDetailsResult.rows);
+
     if (siswaDetailsResult.rowCount !== 0) {
       const { wali_kelas_id_guru, nama: nama_siswa } = siswaDetailsResult.rows[0];
 
