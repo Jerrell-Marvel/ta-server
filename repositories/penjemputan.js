@@ -110,12 +110,14 @@ export async function updateStatusByIdSiswa(id_siswa, status, client) {
     SET 
       status = $2::status_penjemputan_enum,
       waktu_status_sudah_dekat = CASE
-        WHEN $2::status_penjemputan_enum = 'sudah dekat' AND status != 'sudah dekat' THEN NOW()
+        WHEN $2::status_penjemputan_enum = 'sudah dekat' THEN NOW()
         WHEN $2::status_penjemputan_enum != 'sudah dekat' THEN NULL
         ELSE waktu_status_sudah_dekat
       END
     WHERE 
-      id_siswa = $1 AND tanggal = CURRENT_DATE AND status != $2::status_penjemputan_enum
+      id_siswa = $1 
+      AND tanggal = CURRENT_DATE 
+      AND status != $2::status_penjemputan_enum
     RETURNING *;
   `;
 
