@@ -131,7 +131,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
 
   const penjemputanQueryResult = await penjemputanRepo.findPenjemputanHariIniByIdSiswa(penjemput.id_siswa);
 
-  if (penjemputQueryResult.rowCount === 0 || penjemputQueryResult.rows[0].status === "selesai") {
+  if (penjemputanQueryResult.rowCount === 0 || penjemputanQueryResult.rows[0].status === "selesai") {
     return;
   }
 
