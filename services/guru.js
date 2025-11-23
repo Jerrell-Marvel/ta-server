@@ -198,5 +198,7 @@ export const getGuruProfile = async (id_guru) => {
     };
   }
 
+  console.log("prof prof", profileGuru);
+
   return profileGuru;
 };
