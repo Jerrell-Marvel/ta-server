@@ -16,6 +16,7 @@ export const getAllPenjemputanHariIni = async (filters) => {
 };
 
 export const verifyAndCompletePenjemputan = async (qrCodeData) => {
+  console.log(qrCodeData);
   let payload;
   try {
     payload = JSON.parse(qrCodeData.data);
