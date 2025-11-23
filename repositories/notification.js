@@ -2,8 +2,8 @@ import pool from "../db.js";
 
 export async function getNotificationTokensByIdGuru(id_guru) {
   const query = `
-      SELECT T.token
-      FROM Notification_Token T
+      SELECT *
+      FROM Notification_Token t
       JOIN Guru G ON T.id_guru = G.id_guru
       WHERE G.id_guru = $1;
     `;

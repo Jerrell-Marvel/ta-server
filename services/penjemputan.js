@@ -146,7 +146,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
       console.log("tok tok", tokensResult.rows);
 
       if (tokensResult.rowCount > 0) {
-        const tokens = tokensResult.rows.map((row) => row.token);
+        const tokens = tokensResult.rows.map((row) => row.notification_token);
 
         const message = {
           to: tokens,
