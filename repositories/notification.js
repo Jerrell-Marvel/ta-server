@@ -3,7 +3,7 @@ import pool from "../db.js";
 export async function getNotificationTokensByIdGuru(id_guru) {
   const query = `
       SELECT T.token
-      FROM NotificationToken T
+      FROM Notification_Token T
       JOIN Guru G ON T.id_user = G.id_user
       WHERE G.id_guru = $1;
     `;
@@ -15,7 +15,7 @@ export async function getNotificationTokensByIdGuru(id_guru) {
 
 export async function createOrUpdateToken(id_guru, token, device_name) {
   const query = `
-      INSERT INTO NotificationToken (id_guru, token, device_name)
+      INSERT INTO Notification_Token (id_guru, token, device_name)
       VALUES ($1, $2, $3)
       ON CONFLICT (token) 
       DO UPDATE SET

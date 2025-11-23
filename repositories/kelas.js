@@ -200,3 +200,17 @@ export const findKelasByIdGuru = async (id_guru) => {
   const result = await pool.query(query, [id_guru]);
   return result;
 };
+
+export async function getKelasByIdSiswa(id_siswa) {
+  const query = `
+    SELECT
+      *
+    FROM Siswa s
+    JOIN Kelas k ON s.id_kelas = k.id_kelas
+    WHERE s.id_siswa = $1  AND s.is_active = TRUE;
+  `;
+
+  const values = [id_siswa];
+  const result = await pool.query(query, values);
+  return result;
+}

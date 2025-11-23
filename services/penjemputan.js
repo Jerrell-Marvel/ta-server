@@ -9,6 +9,7 @@ import * as guruRepo from "../repositories/guru.js";
 import * as notificationRepo from "../repositories/notification.js";
 import { sendPushNotification } from "../utils/sendNotification.js";
 import pool from "../db.js";
+import * as siswaRepo from "../repositories/siswa.js";
 
 export const getAllPenjemputanHariIni = async (filters) => {
   const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
@@ -131,10 +132,10 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 
   if (status === "sudah dekat") {
-    const siswaDetailsResult = await guruRepo.getWaliKelasByIdSiswa(penjemput.id_siswa);
+    const siswaDetailsResult = await siswaRepo.getSingleSiswa(penjemput.id_siswa);
 
     if (siswaDetailsResult.rowCount !== 0) {
-      const { wali_kelas_id_guru, nama_siswa } = siswaDetailsResult.rows[0];
+      const { wali_kelas_id_guru, nama: nama_siswa } = siswaDetailsResult.rows[0];
 
       const tokensResult = await notificationRepo.getNotificationTokensByIdGuru(wali_kelas_id_guru);
 
