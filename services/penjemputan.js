@@ -8,6 +8,7 @@ import { NotFoundError } from "../errors/NotFoundError.js";
 import * as guruRepo from "../repositories/guru.js";
 import * as notificationRepo from "../repositories/notification.js";
 import { sendPushNotification } from "../utils/sendNotification.js";
+import pool from "../db.js";
 
 export const getAllPenjemputanHariIni = async (filters) => {
   const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
@@ -15,7 +16,14 @@ export const getAllPenjemputanHariIni = async (filters) => {
 };
 
 export const verifyAndCompletePenjemputan = async (qrCodeData) => {
-  const { id_penjemput, exp, device_id, device_name } = qrCodeData.data;
+  let payload;
+  try {
+    payload = JSON.parse(qrCodeData.data);
+  } catch (e) {
+    throw new BadRequestError("Format data QR tidak valid.");
+  }
+
+  const { id_penjemput, exp, device_id, device_name } = payload;
   const signature = qrCodeData.signature;
 
   const expTimestamp = exp * 1000;
@@ -39,11 +47,9 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
 
   const publicKey = publicKeyQueryResult.rows[0].public_key;
 
-  const payload = JSON.parse(qrCodeData.data);
-
   const verify = crypto.createVerify("SHA1");
 
-  verify.update(qrCodeData.data);
+  verify.update(qrCodeData.data, "utf8");
   verify.end();
 
   const isSignatureValid = verify.verify(publicKey, signature, "base64");
