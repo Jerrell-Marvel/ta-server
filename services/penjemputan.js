@@ -133,7 +133,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 
   if (status === "sudah dekat") {
-    const siswaDetailsResult = await siswaRepo.getSingleSiswa(penjemput.id_siswa);
+    const siswaDetailsResult = await siswaRepo.getSingleSiswa({ id_siswa: penjemput.id_siswa });
 
     console.log("siswa details result", siswaDetailsResult.rows);
 
