@@ -139,6 +139,9 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
 
       const tokensResult = await notificationRepo.getNotificationTokensByIdGuru(wali_kelas_id_guru);
 
+      console.log("wakel id", wali_kelas_id_guru);
+      console.log("tok tok", tokensResult.rows);
+
       if (tokensResult.rowCount > 0) {
         const tokens = tokensResult.rows.map((row) => row.token);
 
