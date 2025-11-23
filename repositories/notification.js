@@ -4,7 +4,7 @@ export async function getNotificationTokensByIdGuru(id_guru) {
   const query = `
       SELECT T.token
       FROM Notification_Token T
-      JOIN Guru G ON T.id_user = G.id_user
+      JOIN Guru G ON T.id_guru = G.id_guru
       WHERE G.id_guru = $1;
     `;
 
