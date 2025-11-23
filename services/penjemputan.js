@@ -129,6 +129,7 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
   }
   const penjemput = penjemputQueryResult.rows[0];
 
+  console.log("penjemput", penjemput);
   await penjemputanRepo.updateStatusByIdSiswa(penjemput.id_siswa, status);
 
   if (status === "sudah dekat") {
