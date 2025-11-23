@@ -56,7 +56,7 @@ export const updateStatusPenjemputan = async (req, res) => {
 
   const result = await penjemputanService.updateStatusPenjemputan(id_penjemput, status);
 
-  throw new UnprocessableEntityError("MOOOOONER");
+  // throw new UnprocessableEntityError("MOOOOONER");
 
   res.status(200).json({
     success: true,
