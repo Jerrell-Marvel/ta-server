@@ -221,6 +221,20 @@ export const insertPublicKey = async ({ id_penjemput, public_key, device_id, dev
   return result;
 };
 
+export const upddatePublicKeyByDeviceAndPenjemput = async (device_id, id_penjemput, public_key) => {
+  const query = `
+    UPDATE public_key SET public_key = $1 WHERE device_id = $2 AND id_penjemput = $3;
+  `;
+
+  const values = [public_key, device_id, id_penjemput];
+
+  const executor = pool;
+
+  const result = await executor.query(query, values);
+
+  return result;
+};
+
 export const findPublicKeyByDevice = async (id_penjemput, device_id, client) => {
   const query = `
     SELECT * FROM Public_Key

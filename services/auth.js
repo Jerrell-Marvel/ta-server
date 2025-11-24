@@ -63,7 +63,7 @@ export const login = async ({ username, password, device_id, device_name, notifi
     tokenPayload.id_penjemput = penjemput.id_penjemput;
     tokenPayload.id_murid = penjemput.id_murid;
 
-    const publicKeyQueryResult = await penjemputRepo.findPublicKeyByDevice(penjemput.id_penjemput, device_id);
+    const publicKeyQueryResult = await penjemputRepo.getPublicKeyByDeviceAndPenjemput(device_id, penjemput.id_penjemput);
 
     if (publicKeyQueryResult.rowCount === 0) {
       needPublicKey = true;
