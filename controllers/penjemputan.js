@@ -1,5 +1,7 @@
 import { UnprocessableEntityError } from "../errors/UnprocessableEntityError.js";
 import * as penjemputanService from "../services/penjemputan.js";
+import fs from "fs";
+import path from "path";
 
 export const getAllPenjemputanHariIni = async (req, res) => {
   const { id_kelas, status, search } = req.query;
@@ -51,12 +53,22 @@ export const getDetailPenjemputanHariIni = async (req, res) => {
 };
 
 export const updateStatusPenjemputan = async (req, res) => {
-  const { status } = req.body;
+  const { status, lat, lon, dist } = req.body;
   const { id_penjemput } = req.user;
 
   const result = await penjemputanService.updateStatusPenjemputan(id_penjemput, status);
 
   // throw new UnprocessableEntityError("MOOOOONER");
+
+  const timestamp = new Date().toISOString();
+  const logEntry = `${timestamp} | ID_Penjemput: ${id_penjemput} | Lat: ${lat} | Lon: ${lon} | Status: ${status}\n`;
+  const logFilePath = path.join(process.cwd(), "log.txt");
+
+  fs.appendFile(logFilePath, logEntry, (err) => {
+    if (err) {
+      console.error("Gagal menulis log ke file:", err);
+    }
+  });
 
   res.status(200).json({
     success: true,
