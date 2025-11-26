@@ -61,7 +61,7 @@ export const updateStatusPenjemputan = async (req, res) => {
   // throw new UnprocessableEntityError("MOOOOONER");
 
   const timestamp = new Date().toISOString();
-  const logEntry = `${timestamp} | ID_Penjemput: ${id_penjemput} | Lat: ${lat} | Lon: ${lon} | Status: ${status}\n`;
+  const logEntry = `${timestamp} | ID_Penjemput: ${id_penjemput} | Lat: ${lat} | Lon: ${lon} | Status: ${status} | Dist: ${dist}\n`;
   const logFilePath = path.join(process.cwd(), "log.txt");
 
   fs.appendFile(logFilePath, logEntry, (err) => {
