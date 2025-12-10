@@ -43,7 +43,7 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
 
   const publicKey = publicKeyQueryResult.rows[0].public_key;
 
-  const verify = crypto.createVerify("SHA1");
+  const verify = crypto.createVerify("SHA256");
 
   verify.update(JSON.stringify(qrCodeData.data), "utf8");
   verify.end();
