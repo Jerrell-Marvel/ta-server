@@ -2,10 +2,12 @@
 
 import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { getAllPenjemputanHariIni, getInfoAntrian, verifyPenjemputan, getDetailPenjemputanHariIni, updateStatusPenjemputan } from "../controllers/penjemputan.js";
+import { getAllPenjemputanHariIni, getInfoAntrian, verifyPenjemputan, getDetailPenjemputanHariIni, updateStatusPenjemputan, getHistoryPenjemputan } from "../controllers/penjemputan.js";
 import { updateStatusPenjemputanValidator } from "../middlewares/validator/penjemputan.js";
 
 const router = express.Router();
+
+router.get("/admin", authMiddleware(["admin"]), getHistoryPenjemputan);
 
 router.get("/client", authMiddleware(["guru"]), getAllPenjemputanHariIni);
 router.post("/client/verify", authMiddleware(["guru"]), verifyPenjemputan);
