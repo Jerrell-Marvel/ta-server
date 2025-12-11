@@ -293,7 +293,7 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
         
         -- 3. Belum Ada Data (Logic Baru)
         -- Jika status DB 'menunggu' atau 'sudah dekat', labeli sebagai 'belum ada data penjemputan'
-        WHEN p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'belum ada data penjemputan'
+        WHEN p.status IN ('menunggu penjemputan', 'sudah dekat') AND tanggal=CURRENT_DATE THEN 'belum ada data penjemputan'
 
         -- 4. Default Selesai
         ELSE 'selesai' 
