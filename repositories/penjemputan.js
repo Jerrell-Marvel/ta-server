@@ -232,9 +232,21 @@ const buildHistoryWhere = (search, status, tanggal) => {
   }
 
   if (status) {
-    conditions.push(`p.status = $${paramIndex}`);
-    params.push(status);
-    paramIndex++;
+    if (status === "penjemputan insidental") {
+      conditions.push(`(p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL)`);
+    } else if (status === "tidak dijemput") {
+      conditions.push(`(p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE)`);
+    } else if (status === "menunggu penjemputan") {
+      conditions.push(`p.status = 'menunggu penjemputan'`);
+    } else {
+      if (status === "selesai") {
+        conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
+      } else {
+        conditions.push(`p.status = $${paramIndex}`);
+        params.push(status);
+        paramIndex++;
+      }
+    }
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
