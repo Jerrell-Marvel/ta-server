@@ -238,7 +238,7 @@ const buildHistoryWhere = (search, status, tanggal) => {
       // Logic: Waktu kosong DAN tanggal < hari ini
       conditions.push(`(p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE)`);
     } else if (status === "belum ada data penjemputan") {
-      conditions.push(`p.status IN ('menunggu penjemputan', 'sudah dekat')`);
+      conditions.push(`p.status IN ('menunggu penjemputan', 'sudah dekat') AND tanggal=CURRENT_DATE`);
     } else if (status === "selesai") {
       conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
     }
