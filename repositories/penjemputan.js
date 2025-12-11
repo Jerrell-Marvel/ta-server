@@ -298,9 +298,7 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
 
         ELSE p.status::text 
       END AS status_tampil,
-      
-      p.status AS original_status
-      
+            
       p.status AS original_status
 
     FROM Penjemputan p
