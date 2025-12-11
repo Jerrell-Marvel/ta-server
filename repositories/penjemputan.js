@@ -235,17 +235,12 @@ const buildHistoryWhere = (search, status, tanggal) => {
     if (status === "penjemputan insidental") {
       conditions.push(`(p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL)`);
     } else if (status === "tidak dijemput") {
+      // Logic: Waktu kosong DAN tanggal < hari ini
       conditions.push(`(p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE)`);
-    } else if (status === "menunggu penjemputan") {
-      conditions.push(`p.status = 'menunggu penjemputan'`);
-    } else {
-      if (status === "selesai") {
-        conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
-      } else {
-        conditions.push(`p.status = $${paramIndex}`);
-        params.push(status);
-        paramIndex++;
-      }
+    } else if (status === "belum ada data penjemputan") {
+      conditions.push(`p.status IN ('menunggu penjemputan', 'sudah dekat')`);
+    } else if (status === "selesai") {
+      conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
     }
   }
 
@@ -290,13 +285,18 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
       u.nama AS nama_penjemput,
       
       CASE 
+        -- 1. Penjemputan Insidental
         WHEN p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL THEN 'penjemputan insidental'
         
+        -- 2. Tidak Dijemput (Masa Lalu)
         WHEN p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE THEN 'tidak dijemput'
         
-        WHEN p.waktu_penjemputan_aktual IS NULL AND p.tanggal >= CURRENT_DATE THEN 'menunggu penjemputan'
+        -- 3. Belum Ada Data (Logic Baru)
+        -- Jika status DB 'menunggu' atau 'sudah dekat', labeli sebagai 'belum ada data penjemputan'
+        WHEN p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'belum ada data penjemputan'
 
-        ELSE p.status::text 
+        -- 4. Default Selesai
+        ELSE 'selesai' 
       END AS status_tampil,
             
       p.status AS original_status
