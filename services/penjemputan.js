@@ -19,7 +19,7 @@ export const getAllPenjemputanHariIni = async (filters) => {
 export const verifyAndCompletePenjemputan = async (qrCodeData) => {
   const payload = qrCodeData.data;
 
-  const { id_penjemput, exp, device_id, device_name } = payload;
+  const { id_penjemput, exp, device_id, device_name, is_insidental } = payload;
   const signature = qrCodeData.signature;
 
   const expTimestamp = exp * 1000;
@@ -63,7 +63,12 @@ export const verifyAndCompletePenjemputan = async (qrCodeData) => {
     if (updateStatusQueryResult.rowCount === 0) {
       throw new ConflictError("Penjemputan sudah selesai, tidak dapat memverifikasi ulang.");
     }
-    const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput }, client);
+
+    if (!is_insidental) {
+      const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()", id_penjemput }, client);
+    } else {
+      const updatePenjemputanQueryResult = await penjemputanRepo.updatePenjemputanByIdSiswa(penjemput.id_siswa, { waktu_penjemputan_aktual: "NOW()" }, client);
+    }
 
     await client.query("COMMIT");
   } catch (error) {

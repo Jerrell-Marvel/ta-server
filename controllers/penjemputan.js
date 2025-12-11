@@ -1,3 +1,4 @@
+import { BadRequestError } from "../errors/BadRequestError.js";
 import { UnprocessableEntityError } from "../errors/UnprocessableEntityError.js";
 import * as penjemputanService from "../services/penjemputan.js";
 import { getTodayDateString } from "../utils/getTodayDate.js";
@@ -34,10 +35,7 @@ export const getAllPenjemputanHariIni = async (req, res) => {
 };
 
 export const verifyPenjemputan = async (req, res, next) => {
-  const { qr_code_string } = req.body;
-  const qrCodeData = JSON.parse(qr_code_string);
-
-  console.log(qrCodeData);
+  const { qrCodeData } = req.body;
 
   await penjemputanService.verifyAndCompletePenjemputan(qrCodeData);
 

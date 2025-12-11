@@ -14,9 +14,33 @@ export const updateStatusPenjemputanValidator = (req, res, next) => {
   next();
 };
 
+const required = ["id_penjemput", "exp", "device_id", "device_name", "is_insidental"];
+const qrCodeDataRule = [
+  { field: "id_penjemput", displayName: "id penjemput" },
+
+  { field: "exp", displayName: "exp" },
+  { field: "device_id", displayName: "device id" },
+  { field: "device_name", displayName: "device name" },
+  { field: "is_insidental", displayName: "is insidental" },
+];
+export const verifyPenjemputanValidator = (req, res, next) => {
+  const { qr_code_string } = req.body;
+
+  let qrCodeData;
+  try {
+    qrCodeData = JSON.parse(qr_code_string);
+    validateObject(qrCodeData);
+  } catch (err) {
+    throw new BadRequestError("Format QR Code tidak valid.");
+  }
+
+  req.body.qrCodeData = qrCodeData;
+  next();
+};
+
 export const validateHistory = (req, res, next) => {
   const { page, limit, search, status, tanggal } = req.query;
-
+  h;
   if (status) {
     const allowedStatuses = ["selesai", "penjemputan insidental", "tidak dijemput", "belum ada data penjemputan"];
 
