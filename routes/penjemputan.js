@@ -7,7 +7,7 @@ import { updateStatusPenjemputanValidator } from "../middlewares/validator/penje
 
 const router = express.Router();
 
-router.get("/admin", authMiddleware(["admin"]), getHistoryPenjemputan);
+router.get("/history", authMiddleware(["admin"]), getHistoryPenjemputan);
 
 router.get("/client", authMiddleware(["guru"]), getAllPenjemputanHariIni);
 router.post("/client/verify", authMiddleware(["guru"]), verifyPenjemputan);
