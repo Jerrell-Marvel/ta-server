@@ -215,3 +215,88 @@ export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_ak
 
   return result.rows;
 };
+
+const buildHistoryWhere = (search, status, tanggal) => {
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
+  conditions.push(`p.tanggal = $${paramIndex}`);
+  params.push(tanggal);
+  paramIndex++;
+
+  if (search) {
+    conditions.push(`(s.nama ILIKE $${paramIndex} OR u.nama ILIKE $${paramIndex})`);
+    params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  if (status) {
+    conditions.push(`p.status = $${paramIndex}`);
+    params.push(status);
+    paramIndex++;
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  return { whereClause, params, paramIndex };
+};
+
+export const countHistory = async ({ search, status, tanggal }) => {
+  const { whereClause, params } = buildHistoryWhere(search, status, tanggal);
+
+  const query = `
+    SELECT COUNT(p.id_penjemputan) 
+    FROM Penjemputan p
+    JOIN Siswa s ON p.id_siswa = s.id_siswa
+    LEFT JOIN Penjemput pj ON p.id_penjemput = pj.id_penjemput
+    LEFT JOIN Users u ON pj.id_user = u.id_user
+    ${whereClause}
+  `;
+
+  const result = await db.query(query, params);
+  return result.rows[0].count;
+};
+
+export const findHistory = async ({ limit, offset, search, status, tanggal }) => {
+  const { whereClause, params, paramIndex } = buildHistoryWhere(search, status, tanggal);
+
+  const limitParamIndex = paramIndex;
+  const offsetParamIndex = paramIndex + 1;
+
+  const query = `
+    SELECT 
+      p.id_penjemputan,
+      p.tanggal,
+      p.waktu_penjemputan_aktual,
+      p.waktu_status_sudah_dekat,
+      
+      s.nama AS nama_siswa,
+      s.url_foto AS foto_siswa,
+      k.nomor_kelas,
+      k.varian_kelas,
+
+      u.nama AS nama_penjemput,
+      
+      CASE 
+        WHEN p.id_penjemput IS NULL THEN 'penjemputan insidental'
+        ELSE p.status::text 
+      END AS status_tampil,
+      
+      p.status AS original_status
+
+    FROM Penjemputan p
+    JOIN Siswa s ON p.id_siswa = s.id_siswa
+    LEFT JOIN Kelas k ON s.id_kelas = k.id_kelas
+    LEFT JOIN Penjemput pj ON p.id_penjemput = pj.id_penjemput
+    LEFT JOIN Users u ON pj.id_user = u.id_user
+    
+    ${whereClause}
+    
+    ORDER BY p.waktu_penjemputan_aktual DESC NULLS LAST
+    LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
+  `;
+
+  const queryParams = [...params, limit, offset];
+
+  return await pool.query(query, queryParams);
+};

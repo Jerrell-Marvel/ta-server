@@ -1,7 +1,26 @@
 import { UnprocessableEntityError } from "../errors/UnprocessableEntityError.js";
 import * as penjemputanService from "../services/penjemputan.js";
+import { getTodayDateString } from "../utils/getTodayDate.js";
 import fs from "fs";
 import path from "path";
+
+export const getHistoryPenjemputan = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const { search, status } = req.query;
+
+  const tanggal = req.query.tanggal || getTodayDateString();
+
+  const result = await penjemputanService.getAllHistory({
+    page,
+    limit,
+    search,
+    status,
+    tanggal, // tanggal udah format yy-mm-dd
+  });
+
+  res.status(200).json(result);
+};
 
 export const getAllPenjemputanHariIni = async (req, res) => {
   const { id_kelas, status, search } = req.query;

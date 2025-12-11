@@ -169,3 +169,30 @@ export const updateStatusPenjemputan = async (id_penjemput, status) => {
     }
   }
 };
+
+export const getAllHistory = async ({ page, limit, search, status, tanggal }) => {
+  const offset = (page - 1) * limit;
+
+  const totalData = await penjemputanRepo.countHistory({ search, status, tanggal });
+
+  const historyQueryResult = await penjemputanRepo.findHistory({
+    limit,
+    offset,
+    search,
+    status,
+    tanggal,
+  });
+
+  const historyData = historyQueryResult.rows;
+  const totalPages = Math.ceil(totalData / limit);
+
+  return {
+    data: historyData,
+    pagination: {
+      totalItems: parseInt(totalData),
+      totalPages,
+      currentPage: page,
+      limit,
+    },
+  };
+};
