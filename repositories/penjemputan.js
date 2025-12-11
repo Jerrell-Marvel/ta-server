@@ -290,9 +290,16 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
       u.nama AS nama_penjemput,
       
       CASE 
-        WHEN p.id_penjemput IS NULL THEN 'penjemputan insidental'
+        WHEN p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL THEN 'penjemputan insidental'
+        
+        WHEN p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE THEN 'tidak dijemput'
+        
+        WHEN p.waktu_penjemputan_aktual IS NULL AND p.tanggal >= CURRENT_DATE THEN 'menunggu penjemputan'
+
         ELSE p.status::text 
       END AS status_tampil,
+      
+      p.status AS original_status
       
       p.status AS original_status
 
