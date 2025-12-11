@@ -253,7 +253,7 @@ export const countHistory = async ({ search, status, tanggal }) => {
     ${whereClause}
   `;
 
-  const result = await db.query(query, params);
+  const result = await pool.query(query, params);
   return result.rows[0].count;
 };
 
