@@ -29,6 +29,10 @@ export const verifyPenjemputanValidator = (req, res, next) => {
   try {
     qrCodeData = JSON.parse(qr_code_string);
 
+    if (!qrCodeData.data || !qrCodeData.signature) {
+      throw new BadRequestError("Format QR Code tidak valid.");
+    }
+
     // validateObject(qrCodeData, [
     //   { field: "data", displayName: "data" },
     //   { field: "signature", displayName: "signature" },
