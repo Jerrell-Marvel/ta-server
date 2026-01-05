@@ -40,7 +40,6 @@ export const verifyPenjemputanValidator = (req, res, next) => {
 
 export const validateHistory = (req, res, next) => {
   const { page, limit, search, status, tanggal } = req.query;
-  h;
   if (status) {
     const allowedStatuses = ["selesai", "penjemputan insidental", "tidak dijemput", "belum ada data penjemputan"];
 

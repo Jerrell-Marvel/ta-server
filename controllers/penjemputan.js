@@ -6,7 +6,6 @@ import fs from "fs";
 import path from "path";
 
 export const getHistoryPenjemputan = async (req, res) => {
-  return res.json("okay");
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const { search, status } = req.query;
