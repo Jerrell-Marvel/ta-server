@@ -14,7 +14,6 @@ export const updateStatusPenjemputanValidator = (req, res, next) => {
   next();
 };
 
-const required = ["id_penjemput", "exp", "device_id", "device_name", "is_insidental"];
 const qrCodeDataRule = [
   { field: "id_penjemput", displayName: "id penjemput" },
 
@@ -29,7 +28,11 @@ export const verifyPenjemputanValidator = (req, res, next) => {
   let qrCodeData;
   try {
     qrCodeData = JSON.parse(qr_code_string);
-    validateObject(qrCodeData, qrCodeDataRule);
+    validateObject(qrCodeData, [
+      { field: "data", displayName: "data" },
+      { field: "signature", displayName: "signature" },
+    ]);
+    validateObject(qrCodeData.data, qrCodeDataRule);
   } catch (err) {
     throw new BadRequestError("Format QR Code tidak valid.");
   }
