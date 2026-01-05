@@ -29,7 +29,7 @@ export const verifyPenjemputanValidator = (req, res, next) => {
   let qrCodeData;
   try {
     qrCodeData = JSON.parse(qr_code_string);
-    validateObject(qrCodeData);
+    validateObject(qrCodeData, qrCodeDataRule);
   } catch (err) {
     throw new BadRequestError("Format QR Code tidak valid.");
   }
