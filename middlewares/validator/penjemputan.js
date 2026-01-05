@@ -16,7 +16,7 @@ export const updateStatusPenjemputanValidator = (req, res, next) => {
 
 const qrCodeDataRule = [
   { field: "id_penjemput", displayName: "id penjemput" },
-
+  { field: "iat", displayName: "iat" },
   { field: "exp", displayName: "exp" },
   { field: "device_id", displayName: "device id" },
   { field: "device_name", displayName: "device name" },
@@ -28,6 +28,7 @@ export const verifyPenjemputanValidator = (req, res, next) => {
   let qrCodeData;
   try {
     qrCodeData = JSON.parse(qr_code_string);
+
     validateObject(qrCodeData, [
       { field: "data", displayName: "data" },
       { field: "signature", displayName: "signature" },
