@@ -20,7 +20,7 @@ const qrCodeDataRule = [
   { field: "exp", displayName: "exp" },
   { field: "device_id", displayName: "device id" },
   { field: "device_name", displayName: "device name" },
-  { field: "is_insidental", displayName: "is insidental" },
+  // { field: "is_insidental", displayName: "is insidental" },
 ];
 export const verifyPenjemputanValidator = (req, res, next) => {
   const { qr_code_string } = req.body;
@@ -29,14 +29,10 @@ export const verifyPenjemputanValidator = (req, res, next) => {
   try {
     qrCodeData = JSON.parse(qr_code_string);
 
-    if (!qrCodeData.data || !qrCodeData.signature) {
-      throw new BadRequestError("Format QR Code tidak valid.");
-    }
-
-    // validateObject(qrCodeData, [
-    //   { field: "data", displayName: "data" },
-    //   { field: "signature", displayName: "signature" },
-    // ]);
+    validateObject(qrCodeData, [
+      { field: "data", displayName: "data" },
+      { field: "signature", displayName: "signature" },
+    ]);
     console.log(qrCodeData.data);
     validateObject(qrCodeData.data, qrCodeDataRule);
   } catch (err) {
