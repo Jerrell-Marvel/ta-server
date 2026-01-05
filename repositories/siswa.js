@@ -102,7 +102,7 @@ export const getAllSiswas = async ({ limit, offset, search }) => {
     LEFT JOIN Kelas k ON k.id_kelas = s.id_kelas
     WHERE s.is_active = 'true'
     ${searchQuery}
-    ORDER BY s.nama ASC
+    ORDER BY s.created_at DESC
     ${pagination}
   `;
 

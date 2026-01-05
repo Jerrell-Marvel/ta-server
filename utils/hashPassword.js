@@ -8,5 +8,5 @@ export const hashPassword = async (password) => {
   return hashedPass;
 };
 
-// const a = await hashPassword("123");
-// console.log(a);
+const a = await hashPassword("admin");
+console.log(a);
