@@ -92,3 +92,18 @@ export const updateStatusPenjemputan = async (req, res) => {
     data: result,
   });
 };
+
+export const updateKeteranganSiswa = async (req, res, next) => {
+  const { id_siswa } = req.params;
+  const { keterangan } = req.body;
+
+  const { id_guru } = req.user;
+
+  const result = await penjemputanService.updateKeteranganSiswa(id_guru, id_siswa, keterangan);
+
+  res.status(200).json({
+    status: "success",
+    message: "Keterangan penjemputan berhasil diperbarui",
+    data: result,
+  });
+};

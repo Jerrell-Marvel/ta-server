@@ -10,6 +10,7 @@ import * as notificationRepo from "../repositories/notification.js";
 import { sendPushNotification } from "../utils/sendNotification.js";
 import pool from "../db.js";
 import * as siswaRepo from "../repositories/siswa.js";
+import { ForbiddenError } from "../errors/ForbiddenError.js";
 
 export const getAllPenjemputanHariIni = async (filters) => {
   const queryResult = await penjemputanRepo.getAllPenjemputanHariIni(filters);
@@ -200,4 +201,25 @@ export const getAllHistory = async ({ page, limit, search, status, tanggal }) =>
       limit,
     },
   };
+};
+
+export const updateKeteranganSiswa = async (currentGuruId, idSiswa, keterangan) => {
+  const siswaResult = await siswaRepo.getSingleSiswa({ id_siswa: idSiswa });
+  const dataSiswa = siswaResult.rows[0];
+
+  if (!dataSiswa) {
+    throw new NotFoundError("Data siswa tidak ditemukan.");
+  }
+
+  if (dataSiswa.wali_kelas_id_guru !== currentGuruId) {
+    throw new ForbiddenError(`Akses Ditolak: Anda bukan Wali Kelas dari ${dataSiswa.nama}.`);
+  }
+
+  const updatedRows = await penjemputRepo.updatePenjemputanByIdSiswa(idSiswa, { keterangan });
+
+  if (!updatedRows || updatedRows.length === 0) {
+    throw new BadRequestError("Tidak ada jadwal penjemputan aktif untuk siswa ini hari ini.");
+  }
+
+  return updatedRows[0];
 };

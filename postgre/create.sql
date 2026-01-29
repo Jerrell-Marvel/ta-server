@@ -155,6 +155,9 @@
     ALTER TABLE Penjemputan
     ADD COLUMN waktu_status_sudah_dekat TIMESTAMPTZ NULL;
 
+    ALTER TABLE Penjemputan
+    ADD COLUMN keterangan TEXT;
+
 INSERT INTO Penjemputan (id_siswa, tanggal, status)
 SELECT 
     id_siswa, 

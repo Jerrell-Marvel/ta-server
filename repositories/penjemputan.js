@@ -178,7 +178,7 @@ export const findPenjemputanHariIniByIdSiswa = async (id_siswa) => {
   return result;
 };
 
-export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_aktual, id_penjemput, status }, client) => {
+export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_aktual, id_penjemput, status, keterangan }, client) => {
   let setClauses = [];
   let values = [];
   let paramIndex = 1;
@@ -196,6 +196,11 @@ export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_ak
   if (status) {
     setClauses.push(`status = $${paramIndex++}`);
     values.push(status);
+  }
+
+  if (keterangan) {
+    setClauses.push(`keterangan = $${paramIndex++}`);
+    values.push(keterangan);
   }
 
   const setQuery = setClauses.join(", ");
