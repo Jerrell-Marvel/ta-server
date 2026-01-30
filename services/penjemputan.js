@@ -215,7 +215,7 @@ export const updateKeteranganSiswa = async (currentGuruId, idSiswa, keterangan) 
     throw new ForbiddenError(`Akses Ditolak: Anda bukan Wali Kelas dari ${dataSiswa.nama}.`);
   }
 
-  const updatedRows = await penjemputRepo.updatePenjemputanByIdSiswa(idSiswa, { keterangan });
+  const updatedRows = await penjemputanRepo.updatePenjemputanByIdSiswa(idSiswa, { keterangan });
 
   if (!updatedRows || updatedRows.length === 0) {
     throw new BadRequestError("Tidak ada jadwal penjemputan aktif untuk siswa ini hari ini.");

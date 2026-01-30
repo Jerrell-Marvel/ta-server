@@ -103,7 +103,6 @@ export const updateKeteranganSiswa = async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "Keterangan penjemputan berhasil diperbarui",
     data: result,
   });
 };

@@ -226,27 +226,33 @@ const buildHistoryWhere = (search, status, tanggal) => {
   const params = [];
   let paramIndex = 1;
 
+  // 1. Filter Tanggal (Wajib)
   conditions.push(`p.tanggal = $${paramIndex}`);
   params.push(tanggal);
   paramIndex++;
 
+  // 2. Filter Search (Nama Siswa atau Nama Penjemput)
   if (search) {
     conditions.push(`(s.nama ILIKE $${paramIndex} OR u.nama ILIKE $${paramIndex})`);
     params.push(`%${search}%`);
     paramIndex++;
   }
 
+  // 3. Filter Status
   if (status) {
-    if (status === "penjemputan insidental") {
-      conditions.push(`(p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL)`);
-    } else if (status === "tidak dijemput") {
-      // Logic: Waktu kosong DAN tanggal < hari ini
-      conditions.push(`(p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE)`);
-    } else if (status === "belum ada data penjemputan") {
-      conditions.push(`p.status IN ('menunggu penjemputan', 'sudah dekat') AND tanggal=CURRENT_DATE`);
+    if (status === "tidak ada pemindaian QR") {
+      // Logic: Tanggal masa lalu DAN status masih 'menunggu penjemputan'
+      conditions.push(`(p.tanggal < CURRENT_DATE AND p.status = 'menunggu penjemputan')`);
+    } else if (status === "menunggu penjemputan") {
+      // Logic: Hanya tampilkan 'menunggu' jika Hari Ini (atau masa depan)
+      // Karena kalau masa lalu, dia dianggap 'tidak ada pemindaian QR'
+      conditions.push(`(p.tanggal >= CURRENT_DATE AND p.status = 'menunggu penjemputan')`);
+    } else if (status === "sudah dekat") {
+      conditions.push(`p.status = 'sudah dekat'`);
     } else if (status === "selesai") {
-      conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
+      conditions.push(`p.status = 'selesai'`);
     }
+    // Jika status "tidak dijemput" (dari enum DB lama) perlu dihandle, bisa ditambahkan di sini
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -281,6 +287,7 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
       p.tanggal,
       p.waktu_penjemputan_aktual,
       p.waktu_status_sudah_dekat,
+      p.keterangan, 
       
       s.nama AS nama_siswa,
       s.url_foto AS foto_siswa,
@@ -289,19 +296,14 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
 
       u.nama AS nama_penjemput,
       
+      -- LOGIKA STATUS TAMPILAN BARU
       CASE 
-        -- 1. Penjemputan Insidental
-        WHEN p.waktu_penjemputan_aktual IS NOT NULL AND p.id_penjemput IS NULL THEN 'penjemputan insidental'
+        -- 1. Tidak Ada Pemindaian QR: Jika hari sudah lewat DAN status masih menunggu
+        WHEN p.tanggal < CURRENT_DATE AND p.status = 'menunggu penjemputan' THEN 'tidak ada pemindaian QR'
         
-        -- 2. Tidak Dijemput (Masa Lalu)
-        WHEN p.waktu_penjemputan_aktual IS NULL AND p.tanggal < CURRENT_DATE THEN 'tidak dijemput'
-        
-        -- 3. Belum Ada Data (Logic Baru)
-        -- Jika status DB 'menunggu' atau 'sudah dekat', labeli sebagai 'belum ada data penjemputan'
-        WHEN p.status IN ('menunggu penjemputan', 'sudah dekat') AND tanggal=CURRENT_DATE THEN 'belum ada data penjemputan'
-
-        -- 4. Default Selesai
-        ELSE 'selesai' 
+        -- 2. Sisanya ikuti status asli dari database (menunggu penjemputan, sudah dekat, selesai)
+        -- Casting ke TEXT agar tipe datanya konsisten dengan string di atas
+        ELSE p.status::TEXT
       END AS status_tampil,
             
       p.status AS original_status
@@ -314,7 +316,7 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
     
     ${whereClause}
     
-    ORDER BY p.waktu_penjemputan_aktual DESC NULLS LAST
+    ORDER BY p.waktu_penjemputan_aktual DESC NULLS LAST, p.id_penjemputan DESC
     LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
   `;
 
