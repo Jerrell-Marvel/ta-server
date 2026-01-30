@@ -61,11 +61,3 @@ export const validateHistory = (req, res, next) => {
 
   next();
 };
-
-const updateKeteranganRule = [{ field: "keterangan", displayName: "Keterangan" }];
-
-export const updateKeteranganValidator = (req, res, next) => {
-  validateObject(req.body, updateKeteranganRule);
-
-  next();
-};

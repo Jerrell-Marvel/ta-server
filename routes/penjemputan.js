@@ -14,6 +14,6 @@ router.post("/client/verify", verifyPenjemputanValidator, authMiddleware(["guru"
 router.get("/client/antrian", authMiddleware(["guru", "penjemput"]), getInfoAntrian);
 router.get("/client/detail/:id_penjemput", authMiddleware(["guru"]), getDetailPenjemputanHariIni);
 router.post("/client/status", updateStatusPenjemputanValidator, authMiddleware(["penjemput"]), updateStatusPenjemputan);
-router.patch("/client/keterangan/:id_siswa", authMiddleware(["guru"]), updateKeteranganValidator, updateKeteranganSiswa);
+router.patch("/client/keterangan/:id_siswa", authMiddleware(["guru"]), updateKeteranganSiswa);
 
 export default router;
