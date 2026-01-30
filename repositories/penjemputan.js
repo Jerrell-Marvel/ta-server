@@ -6,6 +6,7 @@ const PENJEMPUT_QUERY = `
           p.status,
           p.tanggal,
           p.waktu_penjemputan_aktual,
+          p.keterangan,
           
           s.id_siswa,
           s.nama AS nama_siswa,
