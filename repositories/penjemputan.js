@@ -199,7 +199,7 @@ export const updatePenjemputanByIdSiswa = async (idSiswa, { waktu_penjemputan_ak
     values.push(status);
   }
 
-  if (keterangan) {
+  if (keterangan !== undefined) {
     setClauses.push(`keterangan = $${paramIndex++}`);
     values.push(keterangan);
   }
