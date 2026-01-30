@@ -44,17 +44,19 @@ export const verifyPenjemputanValidator = (req, res, next) => {
 };
 
 export const validateHistory = (req, res, next) => {
-  const { page, limit, search, status, tanggal } = req.query;
+  const { status, tanggal } = req.query;
+
   if (status) {
-    const allowedStatuses = ["selesai", "penjemputan insidental", "tidak dijemput", "belum ada data penjemputan"];
+    const allowedStatuses = ["selesai", "penjemputan insidental", "belum ada data penjemputan", "tidak ada pemindaian QR"];
+    // "tidak dijemput" sudah dihapus
 
     if (!allowedStatuses.includes(status)) {
       throw new BadRequestError(`Status tidak valid untuk history. Pilihan: ${allowedStatuses.join(", ")}`);
     }
   }
 
-  if (!isValidDate(tanggal)) {
-    throw new BadRequestError("Format tanggal tidak valid.");
+  if (tanggal && !isValidDate(tanggal)) {
+    throw new BadRequestError("Format tanggal tidak valid (gunakan YYYY-MM-DD).");
   }
 
   next();

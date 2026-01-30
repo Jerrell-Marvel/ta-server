@@ -231,7 +231,7 @@ const buildHistoryWhere = (search, status, tanggal) => {
   params.push(tanggal);
   paramIndex++;
 
-  // 2. Filter Search (Nama Siswa atau Nama Penjemput)
+  // 2. Filter Search
   if (search) {
     conditions.push(`(s.nama ILIKE $${paramIndex} OR u.nama ILIKE $${paramIndex})`);
     params.push(`%${search}%`);
@@ -240,25 +240,27 @@ const buildHistoryWhere = (search, status, tanggal) => {
 
   // 3. Filter Status
   if (status) {
-    if (status === "tidak ada pemindaian QR") {
-      // Logic: Tanggal masa lalu DAN status masih 'menunggu penjemputan'
-      conditions.push(`(p.tanggal < CURRENT_DATE AND p.status = 'menunggu penjemputan')`);
-    } else if (status === "menunggu penjemputan") {
-      // Logic: Hanya tampilkan 'menunggu' jika Hari Ini (atau masa depan)
-      // Karena kalau masa lalu, dia dianggap 'tidak ada pemindaian QR'
-      conditions.push(`(p.tanggal >= CURRENT_DATE AND p.status = 'menunggu penjemputan')`);
-    } else if (status === "sudah dekat") {
-      conditions.push(`p.status = 'sudah dekat'`);
+    if (status === "penjemputan insidental") {
+      // Aturan: Status 'selesai' TAPI id_penjemput NULL
+      conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NULL)`);
+    } else if (status === "belum ada data penjemputan") {
+      // Aturan: Hari INI + Status Masih Menunggu/Sudah Dekat
+      conditions.push(`(p.tanggal = CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat'))`);
+    } else if (status === "tidak ada pemindaian QR") {
+      // Aturan: BUKAN Hari Ini (Masa Lalu) + Status Masih Menunggu/Sudah Dekat
+      conditions.push(`(p.tanggal < CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat'))`);
     } else if (status === "selesai") {
-      conditions.push(`p.status = 'selesai'`);
+      // Aturan: Status 'selesai' DAN ada penjemputnya
+      conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
     }
-    // Jika status "tidak dijemput" (dari enum DB lama) perlu dihandle, bisa ditambahkan di sini
+    // Blok "tidak dijemput" telah dihapus
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { whereClause, params, paramIndex };
 };
 
+// Count Data
 export const countHistory = async ({ search, status, tanggal }) => {
   const { whereClause, params } = buildHistoryWhere(search, status, tanggal);
 
@@ -272,9 +274,10 @@ export const countHistory = async ({ search, status, tanggal }) => {
   `;
 
   const result = await pool.query(query, params);
-  return result.rows[0].count;
+  return parseInt(result.rows[0].count);
 };
 
+// Find Data
 export const findHistory = async ({ limit, offset, search, status, tanggal }) => {
   const { whereClause, params, paramIndex } = buildHistoryWhere(search, status, tanggal);
 
@@ -287,7 +290,7 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
       p.tanggal,
       p.waktu_penjemputan_aktual,
       p.waktu_status_sudah_dekat,
-      p.keterangan, 
+      p.keterangan,
       
       s.nama AS nama_siswa,
       s.url_foto AS foto_siswa,
@@ -296,13 +299,17 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
 
       u.nama AS nama_penjemput,
       
-      -- LOGIKA STATUS TAMPILAN BARU
       CASE 
-        -- 1. Tidak Ada Pemindaian QR: Jika hari sudah lewat DAN status masih menunggu
-        WHEN p.tanggal < CURRENT_DATE AND p.status = 'menunggu penjemputan' THEN 'tidak ada pemindaian QR'
+        -- 1. Penjemputan Insidental: Status Selesai tapi Penjemput Kosong
+        WHEN p.status = 'selesai' AND p.id_penjemput IS NULL THEN 'penjemputan insidental'
         
-        -- 2. Sisanya ikuti status asli dari database (menunggu penjemputan, sudah dekat, selesai)
-        -- Casting ke TEXT agar tipe datanya konsisten dengan string di atas
+        -- 2. Belum Ada Data: Hari Ini + Masih Menunggu/Sudah Dekat
+        WHEN p.tanggal = CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'belum ada data penjemputan'
+
+        -- 3. Tidak Ada Pemindaian QR: Masa Lalu + Masih Menunggu/Sudah Dekat
+        WHEN p.tanggal < CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'tidak ada pemindaian QR'
+
+        -- 4. Default
         ELSE p.status::TEXT
       END AS status_tampil,
             
