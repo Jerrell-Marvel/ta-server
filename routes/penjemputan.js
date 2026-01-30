@@ -3,7 +3,7 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { getAllPenjemputanHariIni, getInfoAntrian, verifyPenjemputan, getDetailPenjemputanHariIni, updateStatusPenjemputan, getHistoryPenjemputan, updateKeteranganSiswa } from "../controllers/penjemputan.js";
-import { updateKeteranganValidator, updateStatusPenjemputanValidator, validateHistory, verifyPenjemputanValidator } from "../middlewares/validator/penjemputan.js";
+import { updateStatusPenjemputanValidator, validateHistory, verifyPenjemputanValidator } from "../middlewares/validator/penjemputan.js";
 
 const router = express.Router();
 
