@@ -4,7 +4,7 @@ export const createPenjemput = async (req, res) => {
   const url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
 
   const newPenjemput = await penjemputService.createPenjemput({ ...req.body, url_foto });
-  // newPenjemput.url_foto = url_foto;
+
   res.status(201).json({ success: true, data: newPenjemput });
 };
 

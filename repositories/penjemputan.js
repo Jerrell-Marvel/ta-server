@@ -62,7 +62,6 @@ export const getAllPenjemputanHariIni = async (filters = {}) => {
     paramIndex++;
   }
 
-  // Default ordering
   query += `
      ORDER BY
        k.nomor_kelas ASC, k.varian_kelas ASC, s.nama ASC;
@@ -227,41 +226,32 @@ const buildHistoryWhere = (search, status, tanggal) => {
   const params = [];
   let paramIndex = 1;
 
-  // 1. Filter Tanggal (Wajib)
   conditions.push(`p.tanggal = $${paramIndex}`);
   params.push(tanggal);
   paramIndex++;
 
-  // 2. Filter Search
   if (search) {
     conditions.push(`(s.nama ILIKE $${paramIndex} OR u.nama ILIKE $${paramIndex})`);
     params.push(`%${search}%`);
     paramIndex++;
   }
 
-  // 3. Filter Status
   if (status) {
     if (status === "penjemputan insidental") {
-      // Aturan: Status 'selesai' TAPI id_penjemput NULL
       conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NULL)`);
     } else if (status === "belum ada data penjemputan") {
-      // Aturan: Hari INI + Status Masih Menunggu/Sudah Dekat
       conditions.push(`(p.tanggal = CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat'))`);
     } else if (status === "tidak ada pemindaian QR") {
-      // Aturan: BUKAN Hari Ini (Masa Lalu) + Status Masih Menunggu/Sudah Dekat
       conditions.push(`(p.tanggal < CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat'))`);
     } else if (status === "selesai") {
-      // Aturan: Status 'selesai' DAN ada penjemputnya
       conditions.push(`(p.status = 'selesai' AND p.id_penjemput IS NOT NULL)`);
     }
-    // Blok "tidak dijemput" telah dihapus
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { whereClause, params, paramIndex };
 };
 
-// Count Data
 export const countHistory = async ({ search, status, tanggal }) => {
   const { whereClause, params } = buildHistoryWhere(search, status, tanggal);
 
@@ -278,7 +268,6 @@ export const countHistory = async ({ search, status, tanggal }) => {
   return parseInt(result.rows[0].count);
 };
 
-// Find Data
 export const findHistory = async ({ limit, offset, search, status, tanggal }) => {
   const { whereClause, params, paramIndex } = buildHistoryWhere(search, status, tanggal);
 
@@ -301,16 +290,12 @@ export const findHistory = async ({ limit, offset, search, status, tanggal }) =>
       u.nama AS nama_penjemput,
       
       CASE 
-        -- 1. Penjemputan Insidental: Status Selesai tapi Penjemput Kosong
         WHEN p.status = 'selesai' AND p.id_penjemput IS NULL THEN 'penjemputan insidental'
         
-        -- 2. Belum Ada Data: Hari Ini + Masih Menunggu/Sudah Dekat
         WHEN p.tanggal = CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'belum ada data penjemputan'
 
-        -- 3. Tidak Ada Pemindaian QR: Masa Lalu + Masih Menunggu/Sudah Dekat
         WHEN p.tanggal < CURRENT_DATE AND p.status IN ('menunggu penjemputan', 'sudah dekat') THEN 'tidak ada pemindaian QR'
 
-        -- 4. Default
         ELSE p.status::TEXT
       END AS status_tampil,
             

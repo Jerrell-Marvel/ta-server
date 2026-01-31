@@ -14,9 +14,7 @@ export const updateSiswa = async (req, res) => {
   const updateData = req.body;
 
   if (req.file) {
-    // const url_foto = ;
     updateData.url_foto = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
-    // responseBody.data.url_foto = url_foto;
   }
 
   const updatedSiswa = await siswaService.updateSiswa(parseInt(id_siswa), updateData);
